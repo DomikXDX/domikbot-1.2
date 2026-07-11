@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DomikBot – Giveaway</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<style>
+:root {
+    --bg-primary: #09090b;
+    --bg-secondary: #0c0c0e;
+    --bg-glass: rgba(24,24,27,0.6);
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --border-glass: rgba(255,255,255,0.08);
+    --accent: #9146FF;
+    --giveaway: #f5a623;
+    --giveaway-gradient: linear-gradient(135deg, #f5a623, #f08c14);
+    --danger: #ef4444;
+    --success: #22c55e;
+    --shadow: 0 8px 24px rgba(0,0,0,0.4);
+    --radius: 12px;
+    --radius-lg: 20px;
+    --transition: all 0.3s ease;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    display: flex;
+    min-height: 100vh;
+    padding: 20px;
+}
+.gv-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    width: 100%;
+    max-width: 750px;
+    margin: 0 auto;
+    padding-bottom: 60px;
+    text-align: center;
+}
+.gv-icon-main { font-size: 48px; margin-bottom: 10px; }
+.gv-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--giveaway);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.gv-subtitle { font-size: 1rem; color: var(--text-secondary); margin: 5px 0 30px 0; }
+.gv-card {
+    background: rgba(20,20,23,0.85);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius-lg);
+    padding: 30px;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    text-align: left;
+}
+.gv-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+    display: block;
+}
+.gv-twitch-row {
+    background: rgba(30,24,45,0.6);
+    border: 1px solid rgba(145,70,255,0.25);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.gv-twitch-user { display: flex; align-items: center; gap: 14px; }
+.gv-twitch-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+.gv-twitch-name { font-size: 1.05rem; font-weight: 700; }
+.gv-twitch-subtext {
+    font-size: 0.7rem;
+    color: var(--accent);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.gv-refresh-icon { color: var(--text-secondary); cursor: pointer; opacity: 0.7; transition: var(--transition); }
+.gv-refresh-icon:hover { opacity: 1; }
+.gv-input-block { margin-bottom: 20px; }
+.gv-input-block input {
+    background: #131316;
+    border: 1px solid rgba(255,255,255,0.07);
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 1rem;
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    color: var(--text-primary);
+}
+.gv-input-block input:focus { border-color: var(--giveaway); }
+.gv-inline-inputs { display: flex; gap: 20px; margin-bottom: 25px; }
+.gv-inline-inputs > div { flex: 1; }
+.gv-hint-text { font-size: 0.8rem; color: var(--text-secondary); text-align: center; line-height: 1.5; margin-top: 20px; padding: 0 20px; }
+.gv-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; margin-bottom: 20px; }
+.gv-stat-card { background: #141417; border: 1px solid var(--border-glass); padding: 20px; border-radius: var(--radius); text-align: center; }
+.gv-stat-num { font-size: 2rem; font-weight: 800; color: var(--giveaway); }
+.gv-stat-lbl { font-size: 0.7rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.5px; }
+.gv-action-row { display: flex; gap: 15px; margin-bottom: 20px; width: 100%; }
+.gv-action-row .btn-pick-winner {
+    flex: 3;
+    background: var(--giveaway-gradient);
+    color: #000;
+    border: none;
+    font-weight: 700;
+    font-size: 1.05rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.gv-action-row .btn-reset {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-glass);
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.gv-action-row .btn-reset:hover { background: rgba(255,255,255,0.08); }
+.gv-list-box {
+    background: #141417;
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius);
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+    margin-bottom: 20px;
+}
+.gv-list-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 15px;
+}
+.gv-badges-container { display: flex; flex-wrap: wrap; gap: 10px; min-height: 34px; }
+.gv-user-badge {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    animation: popIn 0.2s ease-out;
+}
+.gv-console-log {
+    background: #0c0c0e;
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: var(--radius);
+    padding: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #666;
+    text-align: left;
+    max-height: 150px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.log-entry { display: flex; gap: 8px; line-height: 1.4; }
+.log-time { color: #444; }
+.log-highlight { color: var(--accent); }
+.log-success { color: var(--success); }
+.audio-info {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border-glass);
+    padding: 14px 20px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 25px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.audio-info strong { color: var(--giveaway); }
+.btn-giveaway {
+    background: var(--giveaway-gradient);
+    color: #000;
+    border: none;
+    padding: 18px 28px;
+    border-radius: 14px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 25px rgba(245,166,35,0.4);
+    width: 100%;
+    letter-spacing: 0.5px;
+}
+.btn-giveaway:hover { transform: translateY(-2px); box-shadow: 0 10px 35px rgba(245,166,35,0.6); }
+.btn-giveaway:active { transform: scale(0.97); }
+.btn-reload {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-glass);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    transition: var(--transition);
+}
+.btn-reload:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+.btn-donate {
+    background: var(--accent);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+}
+.btn-donate:hover { opacity: 0.9; }
+.btn-donate span {
+    background: rgba(0,0,0,0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+}
+.gv-footer-left {
+    position: fixed;
+    bottom: 25px;
+    left: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    z-index: 5;
+    flex-wrap: wrap;
+}
+.gv-footer-copy {
+    position: fixed;
+    bottom: 25px;
+    right: 40px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.05);
+    text-transform: lowercase;
+    user-select: none;
+    z-index: 5;
+}
+@keyframes popIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+@media (max-width: 768px) {
+    .gv-inline-inputs, .gv-stats-grid, .gv-action-row { flex-direction: column; }
+    .gv-footer-left { position: static; margin-top: 20px; justify-content: center; flex-wrap: wrap; }
+    .gv-footer-copy { position: static; text-align: center; margin-top: 10px; }
+}
+</style>
+</head>
+<body>
+<div class="gv-container">
+    <div class="gv-icon-main">🎁</div>
+    <h2 class="gv-title">Giveaway</h2>
+    <div class="gv-subtitle">Розыгрыш в Twitch-чате</div>
+    <div id="gv-screen-setup" class="gv-card">
+        <span class="gv-label">Twitch-канал</span>
+        <div class="gv-twitch-row">
+            <div class="gv-twitch-user">
+                <div class="gv-twitch-avatar" id="gv-avatar-letter">D</div>
+                <div>
+                    <div class="gv-twitch-name" id="gv-twitch-username">@domik_xdx</div>
+                    <div class="gv-twitch-subtext">Твой канал</div>
+                </div>
+            </div>
+            <div class="gv-refresh-icon" onclick="window.location.reload()">🔄</div>
+        </div>
+        <div class="gv-input-block">
+            <span class="gv-label">Ключевое слово для участия</span>
+            <input type="text" id="gv-keyword" value="+" maxlength="10" />
+        </div>
+        <div class="gv-inline-inputs">
+            <div>
+                <span class="gv-label">Время на ответ (сек)</span>
+                <input type="number" id="gv-time" value="20" min="5" max="60" />
+            </div>
+            <div>
+                <span class="gv-label">Макс. победителей</span>
+                <input type="number" id="gv-max-winners" value="1" min="1" max="5" disabled />
+            </div>
+        </div>
+        <span class="gv-label">Звук уведомления</span>
+        <div class="audio-info">
+            <span>🔊 Текущий: <strong>Windows 10</strong></span>
+        </div>
+        <button class="btn-giveaway" onclick="startGiveawayCollection()">Начать сбор</button>
+        <div class="gv-hint-text">
+            Зрители пишут ключевое слово в чат для участия. Победитель должен написать любое сообщение за указанное время.
+        </div>
+    </div>
+    <div id="gv-screen-live" class="gv-card" style="display: none;">
+        <div style="text-align: center; font-size: 0.9rem; margin-bottom: 20px; color: var(--text-secondary);">
+            Ключевое слово: <strong style="background: rgba(245,166,35,0.15); color: var(--giveaway); padding: 4px 10px; border-radius: 6px;" id="gv-live-keyword">+</strong>
+        </div>
+        <div class="gv-stats-grid">
+            <div class="gv-stat-card">
+                <div class="gv-stat-num" id="stat-users">0</div>
+                <div class="gv-stat-lbl">Участников</div>
+            </div>
+            <div class="gv-stat-card">
+                <div class="gv-stat-num" id="stat-messages">0</div>
+                <div class="gv-stat-lbl">Сообщений</div>
+            </div>
+            <div class="gv-stat-card">
+                <div class="gv-stat-num" id="stat-winners">0</div>
+                <div class="gv-stat-lbl">Победителей</div>
+            </div>
+        </div>
+        <div class="gv-action-row">
+            <button class="btn-pick-winner" id="btn-pick-winner" onclick="pickGiveawayWinner()">🎲 Выбрать победителя</button>
+            <button class="btn-reset" onclick="resetGiveaway()">🔄 Сбросить</button>
+        </div>
+        <div class="gv-list-box">
+            <div class="gv-list-title" id="gv-list-counter">Участники (0)</div>
+            <div class="gv-badges-container" id="gv-users-container"></div>
+        </div>
+        <div class="gv-console-log" id="gv-console"></div>
+    </div>
+</div>
+<div class="gv-footer-left">
+    <button class="btn-reload" onclick="window.location.reload()">🔄 Перезагрузить</button>
+    <button class="btn-donate" onclick="openDonate()">💜 Поддержать домика <span id="gv-footer-nick">@domik_xdx</span></button>
+</div>
+<div class="gv-footer-copy">Domik</div>
+
+<script>
+const BACKEND_URL = 'https://domikbot.onrender.com'; // замените на ваш сервер
+const DONATE_URL = 'https://www.donationalerts.com/r/xxx_domik_xxx';
+const socket = io(BACKEND_URL);
+let currentUser = 'domik_xdx';
+let giveawayActive = false;
+let giveawayWinner = null;
+let registeredUsers = new Set();
+let totalMessagesChecked = 0;
+let winnerTimer = null;
+
+function initUser() {
+    const params = new URLSearchParams(window.location.search);
+    const user = params.get('channel') || 'domik_xdx';
+    currentUser = user;
+    document.getElementById('gv-twitch-username').textContent = '@' + currentUser;
+    document.getElementById('gv-footer-nick').textContent = '@' + currentUser;
+    document.getElementById('gv-avatar-letter').textContent = currentUser.charAt(0).toUpperCase();
+    const token = localStorage.getItem('domik_bot_token');
+    if (token) socket.emit('auth', { channel: currentUser, token });
+}
+initUser();
+
+socket.on('connect', () => {
+    console.log('✅ Подключено к серверу');
+    const token = localStorage.getItem('domik_bot_token');
+    if (token) socket.emit('auth', { channel: currentUser, token });
+});
+
+socket.on('chatMessage', (data) => {
+    if (data.channel !== currentUser) return;
+    if (giveawayActive && !giveawayWinner) {
+        const keyword = document.getElementById('gv-keyword').value.trim();
+        if (data.message.trim().toLowerCase() === keyword.toLowerCase()) {
+            if (!registeredUsers.has(data.user)) {
+                registeredUsers.add(data.user);
+                const container = document.getElementById('gv-users-container');
+                container.innerHTML += `<div class="gv-user-badge">${escapeHTML(data.user)}</div>`;
+                document.getElementById('stat-users').textContent = registeredUsers.size;
+                document.getElementById('gv-list-counter').textContent = `Участники (${registeredUsers.size})`;
+                addConsoleLog(`${data.user} участвует!`, 'highlight');
+                playNotificationSound();
+            }
+        }
+    }
+    if (giveawayActive && giveawayWinner && data.user === giveawayWinner) {
+        clearInterval(winnerTimer);
+        giveawayActive = false;
+        addConsoleLog(`✅ @${data.user} получил приз! Розыгрыш завершён.`, 'success');
+        playNotificationSound();
+    }
+});
+
+socket.on('giveaway_update', (data) => {
+    if (data.channel !== currentUser) return;
+    const container = document.getElementById('gv-users-container');
+    container.innerHTML = '';
+    data.users.forEach(user => {
+        container.innerHTML += `<div class="gv-user-badge">${escapeHTML(user)}</div>`;
+    });
+    document.getElementById('stat-users').textContent = data.count;
+    document.getElementById('gv-list-counter').textContent = `Участники (${data.count})`;
+});
+
+function startGiveawayCollection() {
+    const keyword = document.getElementById('gv-keyword').value.trim();
+    if (!keyword) { alert('Введите ключевое слово!'); return; }
+    document.getElementById('gv-screen-setup').style.display = 'none';
+    document.getElementById('gv-screen-live').style.display = 'block';
+    document.getElementById('gv-live-keyword').textContent = keyword;
+    socket.emit('start_giveaway', { channel: currentUser, keyword });
+    giveawayActive = true;
+    giveawayWinner = null;
+    totalMessagesChecked = 0;
+    registeredUsers.clear();
+    document.getElementById('gv-users-container').innerHTML = '';
+    document.getElementById('gv-list-counter').textContent = 'Участники (0)';
+    document.getElementById('stat-users').textContent = '0';
+    document.getElementById('stat-messages').textContent = '0';
+    document.getElementById('stat-winners').textContent = '0';
+    document.getElementById('btn-pick-winner').disabled = false;
+    document.getElementById('gv-console').innerHTML = '';
+    addConsoleLog(`🎯 Сбор начат! Ждём "${keyword}".`, 'success');
+}
+
+function pickGiveawayWinner() {
+    if (registeredUsers.size === 0) { alert('Нет участников!'); return; }
+    document.getElementById('btn-pick-winner').disabled = true;
+    const usersArray = Array.from(registeredUsers);
+    giveawayWinner = usersArray[Math.floor(Math.random() * usersArray.length)];
+    document.getElementById('stat-winners').textContent = '1';
+    addConsoleLog(`🎉 ПОБЕДИТЕЛЬ: @${giveawayWinner}!`, 'success');
+    let timeLeft = parseInt(document.getElementById('gv-time').value) || 20;
+    addConsoleLog(`⏳ Ждём сообщение от @${giveawayWinner}... ${timeLeft} сек.`, 'highlight');
+    winnerTimer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+            clearInterval(winnerTimer);
+            addConsoleLog(`❌ @${giveawayWinner} не ответил вовремя!`, 'highlight');
+            giveawayWinner = null;
+            document.getElementById('btn-pick-winner').disabled = false;
+        }
+    }, 1000);
+}
+
+function resetGiveaway() {
+    giveawayActive = false;
+    giveawayWinner = null;
+    clearInterval(winnerTimer);
+    socket.emit('reset_giveaway', { channel: currentUser });
+    document.getElementById('gv-screen-live').style.display = 'none';
+    document.getElementById('gv-screen-setup').style.display = 'block';
+    document.getElementById('btn-pick-winner').disabled = false;
+}
+
+function playNotificationSound() {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    osc.start();
+    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    osc.stop(ctx.currentTime + 0.3);
+}
+
+function addConsoleLog(text, type = '') {
+    const box = document.getElementById('gv-console');
+    const time = new Date().toTimeString().split(' ')[0];
+    let cls = '';
+    if (type === 'success') cls = 'log-success';
+    if (type === 'highlight') cls = 'log-highlight';
+    box.innerHTML += `<div class="log-entry"><span class="log-time">[${time}]</span><span class="${cls}">${escapeHTML(text)}</span></div>`;
+    box.scrollTop = box.scrollHeight;
+}
+
+function openDonate() { window.open(DONATE_URL, '_blank'); }
+function escapeHTML(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
+
+socket.on('connect_error', (err) => {
+    console.error('Ошибка подключения к серверу:', err);
+    alert('Не удалось подключиться к серверу. Проверьте, запущен ли сервер.');
+});
+</script>
+</body>
+</html>

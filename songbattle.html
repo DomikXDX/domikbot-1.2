@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DomikBot – Song Battle</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #0d0b1a;
+    color: #e0e0e0;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.container { max-width: 800px; width: 100%; }
+.header { text-align: center; margin-bottom: 30px; }
+.header h1 { font-size: 2.2rem; font-weight: 900; background: linear-gradient(to right, #fff, #a1a1aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header p { color: #888; font-size: 0.95rem; }
+.card {
+    background: rgba(20,20,23,0.85);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 20px;
+}
+.field { margin-bottom: 16px; }
+.field label { display: block; color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.field input { width: 100%; padding: 12px 16px; background: #18181b; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; color: #fff; font-size: 1rem; font-family: inherit; outline: none; }
+.field input:focus { border-color: #9146FF; }
+.row { display: flex; gap: 15px; flex-wrap: wrap; }
+.row .field { flex: 1; min-width: 120px; }
+.btn-primary {
+    background: linear-gradient(135deg, #9146FF, #7c3aed);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+}
+.btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(145,70,255,0.5); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-secondary {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #e0e0e0;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.1); }
+.btn-danger { background: #ef4444; color: white; border: none; padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
+.hidden { display: none !important; }
+.song-list { max-height: 300px; overflow-y: auto; margin: 15px 0; }
+.song-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border-left: 3px solid #9146FF;
+    border-radius: 10px;
+    margin-bottom: 6px;
+}
+.song-item .title { font-weight: 600; }
+.song-item .author { font-size: 0.8rem; color: #888; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 15px; }
+.actions .btn-primary { flex: 2; }
+.actions .btn-secondary { flex: 1; }
+.pair { display: flex; gap: 20px; align-items: stretch; margin: 20px 0; }
+.pair .song {
+    flex: 1;
+    text-align: center;
+    padding: 20px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.pair .song .title { font-weight: 700; font-size: 1.2rem; }
+.pair .song .artist { font-size: 0.9rem; color: #888; }
+.pair .song .votes { font-size: 2rem; font-weight: 800; color: #f5a623; }
+.pair .vs { font-size: 2rem; font-weight: 800; color: #888; display: flex; align-items: center; }
+.timer { text-align: center; margin: 15px 0; }
+.timer-bar { height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+.timer-fill { height: 100%; background: linear-gradient(90deg, #9146FF, #7c3aed); transition: width 0.1s linear; }
+.timer-text { font-size: 0.85rem; color: #888; }
+.footer {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.btn-reload {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.78rem;
+    color: #a1a1aa;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-reload:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.btn-donate {
+    background: #9146FF;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-donate:hover { opacity: 0.9; }
+.winner-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 100;
+    text-align: center;
+}
+.winner-overlay.active { display: flex; }
+.winner-overlay h2 { font-size: 3rem; color: #f5a623; }
+.winner-overlay .song { font-size: 2rem; margin: 10px 0; }
+.winner-overlay .btn-primary { max-width: 300px; }
+@media (max-width: 600px) {
+    .pair { flex-direction: column; }
+    .pair .vs { transform: rotate(90deg); }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🎵 Song Battle</h1>
+        <p>Песни сражаются 1 на 1. Чат голосует.</p>
+    </div>
+
+    <!-- SETUP -->
+    <div id="setup-screen" class="card">
+        <div class="field"><label>Twitch канал</label><input type="text" id="channel-input" placeholder="имя_канала" value="domik_xdx"></div>
+        <div class="field"><label>Тема (необязательно)</label><input type="text" id="topic-input" placeholder="Лучшие песни 2025"></div>
+        <div class="row">
+            <div class="field"><label>Макс. песен</label><input type="number" id="max-songs" value="16" min="4"></div>
+            <div class="field"><label>На человека</label><input type="number" id="per-user" value="1" min="1"></div>
+        </div>
+        <button class="btn-primary" onclick="startCollection()">НАЧАТЬ СБОР ПЕСЕН</button>
+    </div>
+
+    <!-- COLLECT -->
+    <div id="collect-screen" class="card hidden">
+        <div style="display:flex;justify-content:space-between;font-weight:600;color:#a1a1aa;margin-bottom:10px;">
+            <span>Сбор песен</span>
+            <span>Чат пишет <strong style="color:#9146FF">!song ссылка</strong></span>
+        </div>
+        <div style="text-align:center;font-size:1.5rem;font-weight:700;margin-bottom:10px;">
+            <span id="song-count">0</span> / <span id="max-songs-display">16</span> песен
+        </div>
+        <div class="song-list" id="song-list"></div>
+        <div class="actions">
+            <button class="btn-primary" id="btn-start-battle" onclick="startBattle()" disabled>НАЧАТЬ БАТТЛ (мин. 4)</button>
+            <button class="btn-secondary" onclick="stopCollection()">Стоп сбор</button>
+        </div>
+        <div style="margin-top:15px;display:flex;gap:10px;">
+            <input type="text" id="manual-url" placeholder="YouTube ссылка" style="flex:1;padding:10px 14px;background:#18181b;border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:#fff;font-family:inherit;">
+            <button class="btn-primary" style="width:auto;padding:10px 18px;font-size:0.85rem;" onclick="addManual()">+ Добавить</button>
+        </div>
+    </div>
+
+    <!-- BATTLE -->
+    <div id="battle-screen" class="card hidden">
+        <div style="text-align:center;margin-bottom:15px;">
+            <div style="font-weight:700;color:#9146FF;" id="round-display">Раунд 1</div>
+            <div style="color:#a1a1aa;font-size:0.9rem;" id="match-display">Матч 1 из 4</div>
+        </div>
+        <div class="timer">
+            <div class="timer-text" id="timer-text">20 сек</div>
+            <div class="timer-bar"><div class="timer-fill" id="timer-fill" style="width:100%"></div></div>
+        </div>
+        <div class="pair" id="pair">
+            <div class="song" id="song1">
+                <div class="title" id="song1-title">Песня 1</div>
+                <div class="artist" id="song1-artist"></div>
+                <div class="votes" id="song1-votes">0</div>
+            </div>
+            <div class="vs">VS</div>
+            <div class="song" id="song2">
+                <div class="title" id="song2-title">Песня 2</div>
+                <div class="artist" id="song2-artist"></div>
+                <div class="votes" id="song2-votes">0</div>
+            </div>
+        </div>
+        <div style="text-align:center;color:#a1a1aa;font-size:0.9rem;margin:10px 0;">Чат пишет <strong style="color:#f5a623">1</strong> или <strong style="color:#f5a623">2</strong></div>
+        <div class="actions">
+            <button class="btn-secondary" onclick="skipPair()">Пропустить</button>
+            <button class="btn-secondary" onclick="endBattle()">Завершить баттл</button>
+        </div>
+    </div>
+</div>
+
+<!-- WINNER OVERLAY -->
+<div class="winner-overlay" id="winner-overlay">
+    <h2>🏆 ПОБЕДИТЕЛЬ!</h2>
+    <div class="song" id="winner-song"></div>
+    <button class="btn-primary" onclick="location.reload()">Новый баттл</button>
+</div>
+
+<div class="footer">
+    <button class="btn-reload" onclick="window.location.reload()">🔄 если залагал — нажми</button>
+    <button class="btn-donate" onclick="openDonate()">💜 Поддержать домика <span id="footer-nick">@domik_xdx</span></button>
+</div>
+
+<script>
+const BACKEND_URL = 'https://domikbot.onrender.com';
+const DONATE_URL = 'https://www.donationalerts.com/r/xxx_domik_xxx';
+const socket = io(BACKEND_URL);
+let currentUser = 'domik_xdx';
+let songs = [], maxSongs = 16, perUser = 1, collecting = false;
+
+function initUser() {
+    const params = new URLSearchParams(window.location.search);
+    const user = params.get('channel') || 'domik_xdx';
+    currentUser = user;
+    document.getElementById('footer-nick').textContent = '@' + currentUser;
+    document.getElementById('channel-input').value = currentUser;
+    const token = localStorage.getItem('domik_bot_token');
+    if (token) socket.emit('auth', { channel: currentUser, token });
+}
+initUser();
+
+socket.on('connect', () => {
+    socket.emit('get_battle_state', { channel: currentUser });
+    const token = localStorage.getItem('domik_bot_token');
+    if (token) socket.emit('auth', { channel: currentUser, token });
+});
+
+socket.on('battle_update', (data) => {
+    if (data.channel !== currentUser) return;
+    renderBattleState(data.battle);
+});
+
+socket.on('battle_timer', (data) => {
+    if (data.channel !== currentUser) return;
+    const secs = Math.ceil(data.timeLeft / 10);
+    document.getElementById('timer-text').textContent = secs + ' сек';
+    document.getElementById('timer-fill').style.width = (data.timeLeft / (20*10) * 100) + '%';
+});
+
+function startCollection() {
+    const channel = document.getElementById('channel-input').value.trim().toLowerCase();
+    if (!channel) { alert('Введите канал!'); return; }
+    currentUser = channel;
+    maxSongs = parseInt(document.getElementById('max-songs').value) || 16;
+    perUser = parseInt(document.getElementById('per-user').value) || 1;
+    const theme = document.getElementById('topic-input').value.trim();
+    songs = []; collecting = true;
+    document.getElementById('max-songs-display').textContent = maxSongs;
+    document.getElementById('song-count').textContent = 0;
+    document.getElementById('song-list').innerHTML = '';
+    document.getElementById('btn-start-battle').disabled = true;
+    document.getElementById('setup-screen').classList.add('hidden');
+    document.getElementById('collect-screen').classList.remove('hidden');
+    socket.emit('start_collection', { channel: currentUser, theme, maxSongs, perUser });
+}
+
+function stopCollection() {
+    collecting = false;
+    socket.emit('stop_collection', { channel: currentUser });
+    document.getElementById('collect-screen').classList.add('hidden');
+    document.getElementById('setup-screen').classList.remove('hidden');
+}
+
+function addManual() {
+    const url = document.getElementById('manual-url').value.trim();
+    if (!url) return;
+    socket.emit('add_song_manual', { channel: currentUser, url });
+    document.getElementById('manual-url').value = '';
+}
+
+function startBattle() { socket.emit('start_battle', { channel: currentUser }); }
+function skipPair() { socket.emit('skip_pair', { channel: currentUser }); }
+function endBattle() { socket.emit('end_battle', { channel: currentUser }); }
+
+function renderBattleState(state) {
+    if (!state) return;
+    switch (state.stage) {
+        case 'collecting':
+            document.getElementById('collect-screen').classList.remove('hidden');
+            document.getElementById('battle-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('song-count').textContent = state.songs.length;
+            const list = document.getElementById('song-list');
+            list.innerHTML = '';
+            state.songs.forEach((s, i) => {
+                const div = document.createElement('div');
+                div.className = 'song-item';
+                div.innerHTML = `
+                    <div><span class="title">${escapeHTML(s.title)}</span> <span class="author">(${escapeHTML(s.addedBy)})</span></div>
+                    <button class="btn-danger" onclick="removeSong(${i})">✕</button>
+                `;
+                list.appendChild(div);
+            });
+            document.getElementById('btn-start-battle').disabled = (state.songs.length < 4);
+            break;
+        case 'voting':
+            document.getElementById('collect-screen').classList.add('hidden');
+            document.getElementById('battle-screen').classList.remove('hidden');
+            document.getElementById('setup-screen').classList.add('hidden');
+            const pair = state.pairs[state.currentPairIndex];
+            if (pair) {
+                document.getElementById('round-display').textContent = `Раунд ${state.round}`;
+                document.getElementById('match-display').textContent = `Матч ${state.currentPairIndex+1} из ${state.pairs.length}`;
+                document.getElementById('song1-title').textContent = pair.song1.title;
+                document.getElementById('song1-artist').textContent = pair.song1.addedBy || '—';
+                document.getElementById('song1-votes').textContent = pair.votes1 || 0;
+                document.getElementById('song2-title').textContent = pair.song2.title;
+                document.getElementById('song2-artist').textContent = pair.song2.addedBy || '—';
+                document.getElementById('song2-votes').textContent = pair.votes2 || 0;
+            }
+            break;
+        case 'finished':
+            document.getElementById('battle-screen').classList.add('hidden');
+            if (state.winner) {
+                document.getElementById('winner-song').textContent = state.winner.title;
+                document.getElementById('winner-overlay').classList.add('active');
+            }
+            break;
+        default:
+            document.getElementById('setup-screen').classList.remove('hidden');
+            document.getElementById('collect-screen').classList.add('hidden');
+            document.getElementById('battle-screen').classList.add('hidden');
+    }
+}
+
+function removeSong(index) { socket.emit('remove_song', { channel: currentUser, index }); }
+function escapeHTML(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
+function openDonate() { window.open(DONATE_URL, '_blank'); }
+
+socket.on('connect_error', (err) => {
+    console.error('Ошибка подключения к серверу:', err);
+    alert('Не удалось подключиться к серверу. Проверьте, запущен ли сервер.');
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "domikbot",
+  "version": "2.0.0",
+  "description": "Мультитенантный Twitch-бот с панелью управления и играми",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2",
+    "tmi.js": "^1.8.5"
+  },
+  "license": "MIT"
+}

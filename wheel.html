@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DomikBot – Поле Чудес</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #0d0b1a;
+    color: #e0e0e0;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.container { max-width: 750px; width: 100%; }
+.header { text-align: center; margin-bottom: 30px; }
+.header h1 { font-size: 2.2rem; font-weight: 900; background: linear-gradient(to right, #fff, #a1a1aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header p { color: #888; font-size: 0.95rem; }
+.card {
+    background: rgba(20,20,23,0.85);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 20px;
+}
+.field { margin-bottom: 16px; }
+.field label { display: block; color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+.field input { width: 100%; padding: 12px 16px; background: #18181b; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; color: #fff; font-size: 1rem; font-family: inherit; outline: none; }
+.field input:focus { border-color: #9146FF; }
+.btn-primary {
+    background: linear-gradient(135deg, #9146FF, #7c3aed);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(145,70,255,0.5); }
+.btn-secondary {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #e0e0e0;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.1); }
+.hidden { display: none !important; }
+.player-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; max-height: 150px; overflow-y: auto; }
+.player-list .badge { background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); }
+.actions { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px; }
+.actions .btn-primary { flex: 2; }
+.actions .btn-secondary { flex: 1; }
+.word-display { font-size: 2.5rem; font-weight: 700; letter-spacing: 8px; text-align: center; padding: 20px 0; color: #fff; }
+.scoreboard { background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; margin: 10px 0; }
+.score-row { display: flex; justify-content: space-between; font-size: 0.95rem; }
+.score-row .name { font-weight: 500; }
+.score-row .score { font-weight: 700; color: #f5a623; }
+.current-player { font-size: 1.1rem; font-weight: 600; color: #9146FF; text-align: center; padding: 8px 0; }
+.commands { font-size: 0.85rem; color: #a1a1aa; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; margin-top: 10px; }
+.commands strong { color: #fff; }
+.footer {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.btn-reload {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.78rem;
+    color: #a1a1aa;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-reload:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.btn-donate {
+    background: #9146FF;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-donate:hover { opacity: 0.9; }
+@media (max-width: 600px) { .word-display { font-size: 1.8rem; letter-spacing: 4px; } }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🌐 Поле Чудес</h1>
+        <p>Twitch Chat Edition</p>
+    </div>
+
+    <!-- SETUP -->
+    <div id="setup-screen" class="card">
+        <div class="field"><label>Twitch канал</label><input type="text" id="channel-input" value="domik_xdx"></div>
+        <div class="field"><label>Слово</label><input type="text" id="word-input" placeholder="Введите слово..."></div>
+        <div class="field"><label>Подсказка</label><input type="text" id="hint-input" placeholder="Категория или подсказка"></div>
+        <div class="field"><label>Макс. ошибок</label><input type="number" id="max-attempts" value="6" min="1"></div>
+        <div class="field"><label>Время на сбор (сек)</label><input type="number" id="collect-time" value="30" min="10"></div>
+        <button class="btn-primary" onclick="startGame()">НАЧАТЬ ИГРУ</button>
+        <div style="font-size:0.8rem;color:#a1a1aa;margin-top:10px;text-align:center;">Зрители пишут <strong style="color:#fff;">!join</strong> в чат, чтобы участвовать.</div>
+    </div>
+
+    <!-- COLLECT -->
+    <div id="collect-screen" class="card hidden">
+        <div style="display:flex;justify-content:space-between;font-weight:600;color:#a1a1aa;">
+            <span>Набор игроков</span>
+            <span id="collect-timer">30с</span>
+        </div>
+        <div style="margin:10px 0;">Пишите <strong style="color:#fff;">!join</strong> в чате чтобы участвовать!</div>
+        <div class="player-list" id="player-list"><div class="badge">domik_xdx (стример)</div></div>
+        <div id="player-count" style="color:#a1a1aa;">1 участников</div>
+        <div class="actions">
+            <button class="btn-primary" onclick="forceStart()">Начать сейчас</button>
+            <button class="btn-secondary" onclick="cancelGame()">Отмена</button>
+        </div>
+    </div>
+
+    <!-- PLAY -->
+    <div id="play-screen" class="card hidden">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+            <div><span style="color:#a1a1aa;font-size:0.8rem;">ПОДСКАЗКА:</span> <span id="hint-display">ФАЛЬВАФЫВЫ</span></div>
+            <div style="display:flex;gap:15px;font-size:0.8rem;color:#a1a1aa;">
+                <span id="revealed-count">0/6</span>
+                <span id="attempts-display">0</span>
+                <span id="players-count">0</span>
+            </div>
+        </div>
+        <div class="word-display" id="word-display">_ _ _ _ _</div>
+        <div class="scoreboard" id="scoreboard"></div>
+        <div class="current-player" id="current-player">> domik_xdx</div>
+        <div class="commands">
+            <span><strong>!spin</strong> — крутить барабан (для текущего игрока)</span><br>
+            <span><strong>Буква</strong> — назвать букву</span><br>
+            <span><strong>!word слово</strong> — угадать слово целиком</span>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <button class="btn-reload" onclick="window.location.reload()">🔄 если залагало — нажми</button>
+    <button class="btn-donate" onclick="openDonate()">💜 Поддержать домика <span id="footer-nick">@domik_xdx</span></button>
+</div>
+
+<script>
+const BACKEND_URL = 'https://domikbot.onrender.com';
+const DONATE_URL = 'https://www.donationalerts.com/r/xxx_domik_xxx';
+const socket = io(BACKEND_URL);
+let currentUser = 'domik_xdx';
+
+function initUser() {
+    const params = new URLSearchParams(window.location.search);
+    const user = params.get('channel') || 'domik_xdx';
+    currentUser = user;
+    document.getElementById('footer-nick').textContent = '@' + currentUser;
+    document.getElementById('channel-input').value = currentUser;
+    const token = localStorage.getItem('domik_bot_token');
+    if (token) socket.emit('auth', { channel: currentUser, token });
+}
+initUser();
+
+socket.on('connect', () => {
+    socket.emit('get_wheel_state', { channel: currentUser });
+    const token = localStorage.getItem('domik_bot_token');
+    if (token) socket.emit('auth', { channel: currentUser, token });
+});
+
+socket.on('wheel_state', (data) => {
+    if (data.channel !== currentUser) return;
+    renderWheelState(data.state);
+});
+
+socket.on('wheel_timer', (data) => {
+    if (data.channel !== currentUser) return;
+    document.getElementById('collect-timer').textContent = data.timeLeft + 'с';
+});
+
+function startGame() {
+    const channel = document.getElementById('channel-input').value.trim().toLowerCase();
+    if (!channel) { alert('Введите канал!'); return; }
+    currentUser = channel;
+    const word = document.getElementById('word-input').value.trim();
+    if (!word) { alert('Введите слово!'); return; }
+    const hint = document.getElementById('hint-input').value.trim();
+    const maxAttempts = parseInt(document.getElementById('max-attempts').value) || 6;
+    const collectTime = parseInt(document.getElementById('collect-time').value) || 30;
+    socket.emit('wheel_start_setup', { channel: currentUser, word, hint, maxAttempts });
+    socket.emit('wheel_start_collecting', { channel: currentUser, duration: collectTime });
+    document.getElementById('setup-screen').classList.add('hidden');
+    document.getElementById('collect-screen').classList.remove('hidden');
+    document.getElementById('play-screen').classList.add('hidden');
+}
+
+function forceStart() { socket.emit('wheel_force_start', { channel: currentUser }); }
+function cancelGame() {
+    socket.emit('wheel_cancel', { channel: currentUser });
+    document.getElementById('setup-screen').classList.remove('hidden');
+    document.getElementById('collect-screen').classList.add('hidden');
+    document.getElementById('play-screen').classList.add('hidden');
+}
+
+function renderWheelState(state) {
+    if (!state) return;
+    switch (state.stage) {
+        case 'collecting':
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('collect-screen').classList.remove('hidden');
+            document.getElementById('play-screen').classList.add('hidden');
+            const list = document.getElementById('player-list');
+            list.innerHTML = '';
+            state.players.forEach(p => {
+                list.innerHTML += `<div class="badge">${escapeHTML(p)}</div>`;
+            });
+            document.getElementById('player-count').textContent = state.players.length + ' участников';
+            break;
+        case 'playing':
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('collect-screen').classList.add('hidden');
+            document.getElementById('play-screen').classList.remove('hidden');
+            const word = state.word || '';
+            const guessed = state.guessedLetters || new Set();
+            let mask = '';
+            for (let ch of word) {
+                if (ch === ' ') mask += '  ';
+                else if (guessed.has(ch.toUpperCase())) mask += ch + ' ';
+                else mask += '_ ';
+            }
+            document.getElementById('word-display').textContent = mask.trim();
+            document.getElementById('hint-display').textContent = state.hint || '';
+            const scoreboard = document.getElementById('scoreboard');
+            scoreboard.innerHTML = '';
+            const scores = state.scores || {};
+            (state.players || []).forEach(p => {
+                scoreboard.innerHTML += `<div class="score-row"><span class="name">${escapeHTML(p)}</span><span class="score">${scores[p]||0}</span></div>`;
+            });
+            const currentIdx = state.currentPlayerIndex || 0;
+            const players = state.players || [];
+            document.getElementById('current-player').textContent = '> ' + (players[currentIdx] || '');
+            const revealed = state.lettersGuessed ? state.lettersGuessed.length : 0;
+            const total = state.word ? state.word.replace(/\s/g, '').length : 0;
+            document.getElementById('revealed-count').textContent = revealed + '/' + total;
+            document.getElementById('attempts-display').textContent = state.wrongAttempts || 0;
+            document.getElementById('players-count').textContent = players.length;
+            break;
+        default:
+            document.getElementById('setup-screen').classList.remove('hidden');
+            document.getElementById('collect-screen').classList.add('hidden');
+            document.getElementById('play-screen').classList.add('hidden');
+    }
+}
+
+function escapeHTML(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
+function openDonate() { window.open(DONATE_URL, '_blank'); }
+
+socket.on('connect_error', (err) => {
+    console.error('Ошибка подключения к серверу:', err);
+    alert('Не удалось подключиться к серверу. Проверьте, запущен ли сервер.');
+});
+</script>
+</body>
+</html>
