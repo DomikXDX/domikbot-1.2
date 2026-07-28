@@ -44,9 +44,12 @@ body {
     z-index: 1000;
     background: var(--bg-primary);
 }
-#login-page .container { display: flex; height: 100%; }
+#login-page .container {
+    display: flex;
+    height: 100%;
+}
 .login-hero {
-    flex: 1;
+    flex: 1.2;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -78,6 +81,7 @@ body {
     align-items: center;
     background: var(--bg-secondary);
     padding: 40px;
+    min-height: 100%;
 }
 .login-card {
     width: 100%;
@@ -88,6 +92,7 @@ body {
     border-radius: var(--radius-lg);
     text-align: center;
     backdrop-filter: blur(10px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
 }
 .login-card h3 {
     font-size: 2rem;
@@ -565,13 +570,12 @@ input:focus, select:focus { border-color: var(--accent); }
 </style>
 </head>
 <body>
-
-<!-- LOGIN -->
+<!-- ===== LOGIN ===== -->
 <div id="login-page">
     <div class="container">
         <div class="login-hero">
             <h1><span>DomikBot</span><br />умный чат-бот для Twitch</h1>
-            <p>Управляйте командами, таймерами, розыгрышами, баттлами песен, полем чудес и угадайкой в один клик.</p>
+            <p>Управляйте командами, таймерами, розыгрышами,<br />баттлами песен, полем чудес и угадайкой в один клик.</p>
         </div>
         <div class="login-form">
             <div class="login-card">
@@ -588,7 +592,7 @@ input:focus, select:focus { border-color: var(--accent); }
     </div>
 </div>
 
-<!-- DASHBOARD -->
+<!-- ===== DASHBOARD ===== -->
 <div id="main-dashboard">
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">Domik<span>Bot</span></div>
@@ -621,7 +625,6 @@ input:focus, select:focus { border-color: var(--accent); }
     </aside>
 
     <main class="content">
-
         <!-- TAB: Commands -->
         <section id="tab-commands" class="tab-content active">
             <h1>Управление командами чата</h1>
@@ -647,7 +650,7 @@ input:focus, select:focus { border-color: var(--accent); }
             <div class="item-list" id="timers-list"></div>
         </section>
 
-        <!-- TAB: Main Settings (без тумблера) -->
+        <!-- TAB: Main Settings -->
         <section id="tab-main-settings" class="tab-content">
             <h1>Главные настройки бота</h1>
             <div style="max-width: 500px; margin: 0 auto; background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius); padding: 30px;">
@@ -1067,16 +1070,15 @@ input:focus, select:focus { border-color: var(--accent); }
         <div class="save-bar" id="global-save-bar">
             <button class="btn-success" onclick="saveConfig()">💾 Сохранить настройки</button>
         </div>
-
     </main>
 </div>
 
 <script>
 // ================================================================
-// ПОЛНЫЙ КЛИЕНТСКИЙ КОД (без тумблера, с автоподключением)
+// ПОЛНЫЙ КЛИЕНТСКИЙ КОД
 // ================================================================
 const TWITCH_CLIENT_ID = 'n71zv0v6u6l5uxc50toagqd87a1n7z';
-const BACKEND_URL = 'https://domikbot-12-production.up.railway.app'; // ЗАМЕНИТЕ НА ВАШ URL
+const BACKEND_URL = 'https://domikbot-12-production.up.railway.app'; // замените на ваш URL
 const DONATE_URL = 'https://www.donationalerts.com/r/xxx_domik_xxx';
 
 let currentUser = 'domik_xdx';
@@ -1105,7 +1107,6 @@ window.onload = function() {
     setupSocket();
 };
 
-// ===== AUTH =====
 function checkAuth() {
     const hash = window.location.hash;
     if (hash) {
@@ -1114,7 +1115,13 @@ function checkAuth() {
         if (token) {
             localStorage.setItem('domik_bot_token', token);
             localStorage.setItem('domik_bot_logged_in', 'true');
+            // Убираем hash из URL чтобы не было повторного срабатывания
             history.replaceState(null, null, window.location.pathname);
+            // Сразу показываем дашборд и грузим данные
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('main-dashboard').style.display = 'flex';
+            fetchTwitchUserData(token);
+            return;
         }
     }
     const isLoggedIn = localStorage.getItem('domik_bot_logged_in') === 'true';
@@ -1168,7 +1175,6 @@ async function fetchTwitchUserData(token) {
             document.getElementById('guess-footer-nick').textContent = '@' + currentUser;
             if (socket) {
                 socket.emit('auth', { channel: currentUser, token });
-                // === АВТОМАТИЧЕСКОЕ ПОДКЛЮЧЕНИЕ БОТА ===
                 socket.emit('set_bot_status', { channel: currentUser, active: true });
             }
             loadConfig();
@@ -1196,7 +1202,6 @@ function setupDemoUser() {
     loadConfig();
 }
 
-// ===== WEBSOCKET =====
 function setupSocket() {
     try {
         socket = io(BACKEND_URL);
@@ -1223,9 +1228,7 @@ function setupSocket() {
         });
 
         socket.on('bot_status_changed', (data) => {
-            if (data.channel === currentUser) {
-                updateBotStatusUI(data.active);
-            }
+            if (data.channel === currentUser) updateBotStatusUI(data.active);
         });
 
         socket.on('battle_update', (data) => {
@@ -1339,7 +1342,6 @@ function setupSocket() {
 
 function handleChatMessage(data) {}
 
-// ===== GIVEAWAY =====
 function startGiveawayCollection() {
     const keyword = document.getElementById('gv-keyword').value.trim();
     if (!keyword) { alert('Введите ключевое слово!'); return; }
@@ -1393,7 +1395,6 @@ function resetGiveaway() {
     document.getElementById('btn-pick-winner').disabled = false;
 }
 
-// ===== ЗВУК (фиксированный Windows 10) =====
 function playNotificationSound() {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
@@ -1421,7 +1422,6 @@ function addConsoleLog(text, type = '') {
     box.scrollTop = box.scrollHeight;
 }
 
-// ===== BOT STATUS (обновление UI) =====
 function updateBotStatusUI(active) {
     const statusText = document.getElementById('bot-status-text');
     if (active) {
@@ -1433,7 +1433,6 @@ function updateBotStatusUI(active) {
     }
 }
 
-// ===== CONFIG =====
 async function loadConfig() {
     try {
         const res = await fetch(`${BACKEND_URL}/api/config?user=${currentUser}`);
@@ -1524,7 +1523,6 @@ function deleteTimer(index) {
     }
 }
 
-// ===== NAVIGATION =====
 function switchTab(tabId, btn) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1598,7 +1596,6 @@ function openGuessApp() {
     if (socket) socket.emit('get_guess_state', { channel: currentUser });
 }
 
-// ===== SONG BATTLE =====
 function startSongCollection() {
     const theme = document.getElementById('sb-theme').value.trim();
     const maxSongs = parseInt(document.getElementById('sb-max-songs').value) || 16;
@@ -1694,7 +1691,6 @@ function renderBattleState(battle) {
                 document.getElementById('sb-song2-url').href = pair.song2.url || '#';
                 document.querySelector('#sb-song2 .sb-song-author').textContent = pair.song2.addedBy;
                 document.getElementById('sb-votes2').textContent = pair.votes2 || 0;
-                // Плееры
                 document.getElementById('sb-iframe1').src = getYouTubeEmbedUrl(pair.song1.url);
                 document.getElementById('sb-iframe2').src = getYouTubeEmbedUrl(pair.song2.url);
             }
@@ -1726,7 +1722,6 @@ function getYouTubeEmbedUrl(url) {
     return '';
 }
 
-// ===== ПОЛЕ ЧУДЕС =====
 function wheelStartCollecting() {
     const word = document.getElementById('wheel-word').value.trim();
     const hint = document.getElementById('wheel-hint').value.trim();
@@ -1813,7 +1808,6 @@ function renderWheelState(state) {
     }
 }
 
-// ===== GUESS THE WORD =====
 function guessStartGame() {
     const category = document.getElementById('guess-category').value;
     const rounds = parseInt(document.getElementById('guess-rounds').value) || 5;
@@ -1855,7 +1849,6 @@ function guessCancel() {
     document.getElementById('guess-screen-finish').style.display = 'none';
 }
 
-// ===== UTILITY =====
 function escapeHTML(str) {
     const div = document.createElement('div');
     div.textContent = str;
@@ -1870,7 +1863,7 @@ function openDonate() {
     window.open(DONATE_URL, '_blank');
 }
 
-// ===== ГЛОБАЛЬНЫЕ ФУНКЦИИ =====
+// ===== Глобальные функции =====
 window.loginWithTwitch = loginWithTwitch;
 window.logout = logout;
 window.switchTab = switchTab;
