@@ -19,7 +19,7 @@ if (!BOT_USERNAME || !BOT_TOKEN || !CLIENT_ID) {
 console.log(`🤖 Бот ${BOT_USERNAME} запускается...`);
 
 const app = express();
-app.set('trust proxy', true); // <-- ГЛАВНОЕ ИСПРАВЛЕНИЕ
+app.set('trust proxy', 1); // <-- ИСПРАВЛЕНО: 1 вместо true
 app.use(helmet());
 app.use(cors({
     origin: ['https://DomikXDX.github.io', 'http://localhost:3000'],
