@@ -19,10 +19,10 @@ if (!BOT_USERNAME || !BOT_TOKEN || !CLIENT_ID) {
 console.log(`🤖 Бот ${BOT_USERNAME} запускается...`);
 
 const app = express();
-app.set('trust proxy', 1); // <-- ИСПРАВЛЕНО: 1 вместо true
+app.set('trust proxy', 1);
 app.use(helmet());
 app.use(cors({
-    origin: ['https://DomikXDX.github.io', 'http://localhost:3000'],
+    origin: ['https://DomikXDX.github.io', 'https://domikxdx.github.io', 'http://localhost:3000'],
     credentials: true
 }));
 app.use(express.json({ limit: '1mb' }));
@@ -44,7 +44,7 @@ app.get('/health', (req, res) => {
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: ['https://DomikXDX.github.io', 'http://localhost:3000'],
+        origin: ['https://DomikXDX.github.io', 'https://domikxdx.github.io', 'http://localhost:3000'],
         methods: ['GET', 'POST']
     },
     transports: ['websocket', 'polling']
