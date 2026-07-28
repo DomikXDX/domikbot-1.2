@@ -62,15 +62,19 @@ function connectBot(channel) {
 io.on('connection', (socket) => {
     console.log('🔌 Клиент подключился');
 
-    socket.on('auth', ({ channel, token }) => {
-        if (!channel) {
-            socket.emit('auth_error', 'Не указан канал');
+    socket.on('auth', async ({ channel, token }) => {
+        if (!channel || !token) {
+            socket.emit('auth_error', 'Не указан канал или токен');
             return;
         }
 
         if (clients[channel]) {
             socket.join(channel);
-            socket.emit('auth_success', { channel, message: 'Уже подключены' });
+            socket.emit('auth_success', { channel, message: 'Уже авторизованы' });
+            const entry = clients[channel];
+            if (entry.client.readyState !== 'OPEN') {
+                connectBot(channel);
+            }
             return;
         }
 
@@ -86,11 +90,10 @@ io.on('connection', (socket) => {
 
             clients[channel] = { client };
             socket.join(channel);
-
             socket.emit('auth_success', { channel, message: 'Авторизация успешна' });
-            socket.emit('bot_status_changed', { channel, active: false });
 
-            console.log(`🔑 Авторизован канал #${channel}`);
+            // === АВТОМАТИЧЕСКОЕ ПОДКЛЮЧЕНИЕ БОТА ===
+            connectBot(channel);
 
             // Обработка сообщений
             client.on('message', (chan, tags, message, self) => {
@@ -105,6 +108,7 @@ io.on('connection', (socket) => {
                     if (cmd === '!ping') {
                         client.say(channel, `@${user}, pong! 🏓`);
                     }
+                    // Здесь можно добавить другие команды
                 }
             });
 
@@ -120,6 +124,7 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Оставляем для совместимости (если нужно ручное управление)
     socket.on('set_bot_status', ({ channel, active }) => {
         if (!channel) return;
         botStatus[channel] = active;

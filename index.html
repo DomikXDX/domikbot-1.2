@@ -360,37 +360,6 @@ input:focus, select:focus { border-color: var(--accent); }
 }
 .app-title { font-size: 0.85rem; color: #e4e4e7; font-weight: 500; max-width: 105px; line-height: 1.2; }
 .save-bar { margin-top: auto; border-top: 1px solid var(--border-glass); padding-top: 25px; display: flex; justify-content: flex-end; }
-.toggle-switch {
-    position: relative;
-    width: 50px;
-    height: 28px;
-    display: inline-block;
-}
-.toggle-switch input { opacity: 0; width: 0; height: 0; }
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: #3f3f46;
-    transition: 0.3s;
-    border-radius: 34px;
-}
-.slider:before {
-    content: "";
-    position: absolute;
-    height: 20px;
-    width: 20px;
-    left: 4px;
-    bottom: 4px;
-    background: white;
-    transition: 0.3s;
-    border-radius: 50%;
-}
-.toggle-switch input:checked + .slider { background: var(--accent); }
-.toggle-switch input:checked + .slider:before { transform: translateX(22px); }
 .settings-checkbox { display: flex; align-items: center; gap: 10px; margin-top: 15px; }
 .settings-checkbox input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); }
 /* ===== GIVEAWAY ===== */
@@ -596,625 +565,597 @@ input:focus, select:focus { border-color: var(--accent); }
 </style>
 </head>
 <body>
-        <!-- ===== LOGIN ===== -->
-    <div id="login-page">
-        <div class="container">
-            <div class="login-hero">
-                <h1><span>DomikBot</span><br />умный чат-бот для Twitch</h1>
-                <p>Управляйте командами, таймерами, розыгрышами, баттлами песен, полем чудес и угадайкой в один клик.</p>
-            </div>
-            <div class="login-form">
-                <div class="login-card">
-                    <h3>Добро пожаловать</h3>
-                    <p>Авторизуйтесь через Twitch, чтобы начать</p>
-                    <button class="btn-twitch" onclick="loginWithTwitch()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
-                        </svg>
-                        Войти через Twitch
-                    </button>
-                </div>
+
+<!-- LOGIN -->
+<div id="login-page">
+    <div class="container">
+        <div class="login-hero">
+            <h1><span>DomikBot</span><br />умный чат-бот для Twitch</h1>
+            <p>Управляйте командами, таймерами, розыгрышами, баттлами песен, полем чудес и угадайкой в один клик.</p>
+        </div>
+        <div class="login-form">
+            <div class="login-card">
+                <h3>Добро пожаловать</h3>
+                <p>Авторизуйтесь через Twitch, чтобы начать</p>
+                <button class="btn-twitch" onclick="loginWithTwitch()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
+                    </svg>
+                    Войти через Twitch
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- ===== DASHBOARD ===== -->
-    <div id="main-dashboard">
-        <!-- SIDEBAR -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-logo">Domik<span>Bot</span></div>
-            <button class="sidebar-toggle" onclick="toggleSidebar()" title="Свернуть/развернуть">◀</button>
-            <div class="user-profile">
-                <img src="" id="user-avatar" class="user-avatar" alt="" />
-                <div class="user-info">
-                    <span id="user-name" class="user-name">Загрузка...</span>
-                    <span class="user-status">Учётная запись</span>
+<!-- DASHBOARD -->
+<div id="main-dashboard">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">Domik<span>Bot</span></div>
+        <button class="sidebar-toggle" onclick="toggleSidebar()" title="Свернуть/развернуть">◀</button>
+        <div class="user-profile">
+            <img src="" id="user-avatar" class="user-avatar" alt="" />
+            <div class="user-info">
+                <span id="user-name" class="user-name">Загрузка...</span>
+                <span class="user-status">Учётная запись</span>
+            </div>
+        </div>
+        <div class="sidebar-category">Настройки бота</div>
+        <button class="tab-btn active" onclick="switchTab('tab-commands', this)">
+            <span>💬</span><span>Чат-Команды</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-timers', this)">
+            <span>📢</span><span>Объявления</span>
+        </button>
+        <div class="sidebar-category">Управление</div>
+        <button class="tab-btn" onclick="switchTab('tab-main-settings', this)">
+            <span>⚙️</span><span>Главные настройки</span>
+        </button>
+        <div class="sidebar-category">Инструменты</div>
+        <button class="tab-btn" onclick="switchTab('tab-hub', this)">
+            <span>🧩</span><span>Хаб приложений</span>
+        </button>
+        <button class="tab-btn logout" onclick="logout()">
+            <span>🚪</span><span>Выйти</span>
+        </button>
+    </aside>
+
+    <main class="content">
+
+        <!-- TAB: Commands -->
+        <section id="tab-commands" class="tab-content active">
+            <h1>Управление командами чата</h1>
+            <div class="form-group">
+                <input type="text" id="cmd-name" placeholder="Название (например: !vk)" maxlength="30" />
+                <input type="text" id="cmd-response" placeholder="Ответ бота..." />
+                <button class="btn-primary" onclick="addCommand()">Добавить</button>
+            </div>
+            <div class="item-list" id="commands-list"></div>
+        </section>
+
+        <!-- TAB: Timers -->
+        <section id="tab-timers" class="tab-content">
+            <h1>Автоматические объявления</h1>
+            <div class="form-group" style="align-items: center; background: var(--bg-glass); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border-glass);">
+                <label style="color: var(--text-secondary); font-weight: 600;">Интервал (минут):</label>
+                <input type="number" id="timer-interval" style="max-width: 90px; text-align: center;" min="1" value="10" />
+            </div>
+            <div class="form-group">
+                <input type="text" id="timer-text" placeholder="Текст уведомления..." />
+                <button class="btn-primary" onclick="addTimer()">Добавить</button>
+            </div>
+            <div class="item-list" id="timers-list"></div>
+        </section>
+
+        <!-- TAB: Main Settings (без тумблера) -->
+        <section id="tab-main-settings" class="tab-content">
+            <h1>Главные настройки бота</h1>
+            <div style="max-width: 500px; margin: 0 auto; background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius); padding: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <span style="font-weight: 600; font-size: 1.1rem;">Текущий канал</span>
+                    <span id="settings-channel-name" style="color: var(--accent); font-weight: 700;">@domik_xdx</span>
+                </div>
+                <hr style="border: none; border-top: 1px solid var(--border-glass); margin: 20px 0;" />
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-weight: 600; font-size: 1.1rem;">Статус бота</div>
+                    <div id="bot-status-text" style="font-size: 0.9rem; color: var(--text-secondary);">Подключение...</div>
+                </div>
+                <div style="margin-top: 10px; font-size: 0.85rem; color: var(--text-secondary);">
+                    Бот автоматически подключается при входе на сайт.
+                </div>
+                <div class="settings-checkbox" style="margin-top: 20px;">
+                    <input type="checkbox" id="open-in-new-window" />
+                    <label for="open-in-new-window" style="color: var(--text-secondary);">Открывать приложения в отдельных окнах</label>
+                </div>
+                <div style="margin-top: 20px; font-size: 0.85rem; color: var(--text-secondary);">
+                    💜 Ссылка на донат: <a href="https://www.donationalerts.com/r/xxx_domik_xxx" target="_blank" style="color: var(--accent);">https://www.donationalerts.com/r/xxx_domik_xxx</a>
                 </div>
             </div>
-            <div class="sidebar-category">Настройки бота</div>
-            <button class="tab-btn active" onclick="switchTab('tab-commands', this)">
-                <span>💬</span><span>Чат-Команды</span>
-            </button>
-            <button class="tab-btn" onclick="switchTab('tab-timers', this)">
-                <span>📢</span><span>Объявления</span>
-            </button>
-            <div class="sidebar-category">Управление</div>
-            <button class="tab-btn" onclick="switchTab('tab-main-settings', this)">
-                <span>⚙️</span><span>Главные настройки</span>
-            </button>
-            <div class="sidebar-category">Инструменты</div>
-            <button class="tab-btn" onclick="switchTab('tab-hub', this)">
-                <span>🧩</span><span>Хаб приложений</span>
-            </button>
-            <button class="tab-btn logout" onclick="logout()">
-                <span>🚪</span><span>Выйти</span>
-            </button>
-        </aside>
+        </section>
 
-        <!-- CONTENT -->
-        <main class="content">
+        <!-- TAB: Hub -->
+        <section id="tab-hub" class="tab-content">
+            <h1>Хаб приложений</h1>
+            <div class="app-grid">
+                <a href="giveaway.html" class="app-item" target="_blank">
+                    <div class="app-icon" style="background:#f5a623">🎁</div>
+                    <div class="app-title">Giveaway</div>
+                </a>
+                <a href="songbattle.html" class="app-item" target="_blank">
+                    <div class="app-icon" style="background:#5b3cc4">🎵</div>
+                    <div class="app-title">Song Battle</div>
+                </a>
+                <a href="wheel.html" class="app-item" target="_blank">
+                    <div class="app-icon" style="background:#9a8b2c">🌐</div>
+                    <div class="app-title">Поле Чудес</div>
+                </a>
+                <a href="guess.html" class="app-item" target="_blank">
+                    <div class="app-icon" style="background:#1d8553">💡</div>
+                    <div class="app-title">Guess Word</div>
+                </a>
+            </div>
+        </section>
 
-            <!-- TAB: Commands -->
-            <section id="tab-commands" class="tab-content active">
-                <h1>Управление командами чата</h1>
-                <div class="form-group">
-                    <input type="text" id="cmd-name" placeholder="Название (например: !vk)" maxlength="30" />
-                    <input type="text" id="cmd-response" placeholder="Ответ бота..." />
-                    <button class="btn-primary" onclick="addCommand()">Добавить</button>
-                </div>
-                <div class="item-list" id="commands-list"></div>
-            </section>
-
-            <!-- TAB: Timers -->
-            <section id="tab-timers" class="tab-content">
-                <h1>Автоматические объявления</h1>
-                <div class="form-group" style="align-items: center; background: var(--bg-glass); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border-glass);">
-                    <label style="color: var(--text-secondary); font-weight: 600;">Интервал (минут):</label>
-                    <input type="number" id="timer-interval" style="max-width: 90px; text-align: center;" min="1" value="10" />
-                </div>
-                <div class="form-group">
-                    <input type="text" id="timer-text" placeholder="Текст уведомления..." />
-                    <button class="btn-primary" onclick="addTimer()">Добавить</button>
-                </div>
-                <div class="item-list" id="timers-list"></div>
-            </section>
-
-            <!-- TAB: Main Settings -->
-            <section id="tab-main-settings" class="tab-content">
-                <h1>Главные настройки бота</h1>
-                <div style="max-width: 500px; margin: 0 auto; background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius); padding: 30px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <span style="font-weight: 600; font-size: 1.1rem;">Текущий канал</span>
-                        <span id="settings-channel-name" style="color: var(--accent); font-weight: 700;">@domik_xdx</span>
+        <!-- TAB: Giveaway -->
+        <section id="tab-giveaway" class="tab-content">
+            <div class="gv-container">
+                <div class="gv-icon-main">🎁</div>
+                <h2 class="gv-title">Giveaway</h2>
+                <div class="gv-subtitle">Розыгрыш в Twitch-чате</div>
+                <div id="gv-screen-setup" class="gv-card">
+                    <span class="gv-label">Twitch-канал</span>
+                    <div class="gv-twitch-row">
+                        <div class="gv-twitch-user">
+                            <div class="gv-twitch-avatar" id="gv-avatar-letter">D</div>
+                            <div>
+                                <div class="gv-twitch-name" id="gv-twitch-username">@domik_xdx</div>
+                                <div class="gv-twitch-subtext">Твой канал</div>
+                            </div>
+                        </div>
+                        <div class="gv-refresh-icon" onclick="window.location.reload()">🔄</div>
                     </div>
-                    <hr style="border: none; border-top: 1px solid var(--border-glass); margin: 20px 0;" />
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="gv-input-block">
+                        <span class="gv-label">Ключевое слово для участия</span>
+                        <input type="text" id="gv-keyword" value="+" maxlength="10" />
+                    </div>
+                    <div class="gv-inline-inputs">
                         <div>
-                            <div style="font-weight: 600; font-size: 1.1rem;">Статус бота</div>
-                            <div id="bot-status-text" style="font-size: 0.9rem; color: var(--text-secondary);">Выключен</div>
+                            <span class="gv-label">Время на ответ (сек)</span>
+                            <input type="number" id="gv-time" value="20" min="5" max="60" />
                         </div>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="bot-toggle" />
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <div class="settings-checkbox">
-                        <input type="checkbox" id="open-in-new-window" />
-                        <label for="open-in-new-window" style="color: var(--text-secondary);">Открывать приложения в отдельных окнах</label>
-                    </div>
-                    <div style="margin-top: 20px; font-size: 0.85rem; color: var(--text-secondary);">
-                        💜 Ссылка на донат: <a href="https://www.donationalerts.com/r/xxx_domik_xxx" target="_blank" style="color: var(--accent);">https://www.donationalerts.com/r/xxx_domik_xxx</a>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TAB: Hub -->
-            <section id="tab-hub" class="tab-content">
-                <h1>Хаб приложений</h1>
-                <div class="app-grid">
-                    <a href="giveaway.html" class="app-item" target="_blank">
-                        <div class="app-icon" style="background:#f5a623">🎁</div>
-                        <div class="app-title">Giveaway</div>
-                    </a>
-                    <a href="songbattle.html" class="app-item" target="_blank">
-                        <div class="app-icon" style="background:#5b3cc4">🎵</div>
-                        <div class="app-title">Song Battle</div>
-                    </a>
-                    <a href="wheel.html" class="app-item" target="_blank">
-                        <div class="app-icon" style="background:#9a8b2c">🌐</div>
-                        <div class="app-title">Поле Чудес</div>
-                    </a>
-                    <a href="guess.html" class="app-item" target="_blank">
-                        <div class="app-icon" style="background:#1d8553">💡</div>
-                        <div class="app-title">Guess Word</div>
-                    </a>
-                </div>
-            </section>
-                        <!-- TAB: Giveaway -->
-            <section id="tab-giveaway" class="tab-content">
-                <div class="gv-container">
-                    <div class="gv-icon-main">🎁</div>
-                    <h2 class="gv-title">Giveaway</h2>
-                    <div class="gv-subtitle">Розыгрыш в Twitch-чате</div>
-                    <div id="gv-screen-setup" class="gv-card">
-                        <span class="gv-label">Twitch-канал</span>
-                        <div class="gv-twitch-row">
-                            <div class="gv-twitch-user">
-                                <div class="gv-twitch-avatar" id="gv-avatar-letter">D</div>
-                                <div>
-                                    <div class="gv-twitch-name" id="gv-twitch-username">@domik_xdx</div>
-                                    <div class="gv-twitch-subtext">Твой канал</div>
-                                </div>
-                            </div>
-                            <div class="gv-refresh-icon" onclick="window.location.reload()">🔄</div>
-                        </div>
-                        <div class="gv-input-block">
-                            <span class="gv-label">Ключевое слово для участия</span>
-                            <input type="text" id="gv-keyword" value="+" maxlength="10" />
-                        </div>
-                        <div class="gv-inline-inputs">
-                            <div>
-                                <span class="gv-label">Время на ответ (сек)</span>
-                                <input type="number" id="gv-time" value="20" min="5" max="60" />
-                            </div>
-                            <div>
-                                <span class="gv-label">Макс. победителей</span>
-                                <input type="number" id="gv-max-winners" value="1" min="1" max="5" disabled />
-                            </div>
-                        </div>
-                        <span class="gv-label">Звук уведомления</span>
-                        <div class="audio-info">
-                            <span>🔊 Текущий: <strong>Windows 10</strong></span>
-                        </div>
-                        <button class="btn-giveaway" onclick="startGiveawayCollection()">Начать сбор</button>
-                        <div class="gv-hint-text">
-                            Зрители пишут ключевое слово в чат для участия. Победитель должен написать любое сообщение за указанное время.
+                        <div>
+                            <span class="gv-label">Макс. победителей</span>
+                            <input type="number" id="gv-max-winners" value="1" min="1" max="5" disabled />
                         </div>
                     </div>
-                    <div id="gv-screen-live" class="gv-card" style="display: none;">
-                        <div style="text-align: center; font-size: 0.9rem; margin-bottom: 20px; color: var(--text-secondary);">
-                            Ключевое слово: <strong style="background: rgba(245,166,35,0.15); color: var(--giveaway); padding: 4px 10px; border-radius: 6px;" id="gv-live-keyword">+</strong>
-                        </div>
-                        <div class="gv-stats-grid">
-                            <div class="gv-stat-card">
-                                <div class="gv-stat-num" id="stat-users">0</div>
-                                <div class="gv-stat-lbl">Участников</div>
-                            </div>
-                            <div class="gv-stat-card">
-                                <div class="gv-stat-num" id="stat-messages">0</div>
-                                <div class="gv-stat-lbl">Сообщений</div>
-                            </div>
-                            <div class="gv-stat-card">
-                                <div class="gv-stat-num" id="stat-winners">0</div>
-                                <div class="gv-stat-lbl">Победителей</div>
-                            </div>
-                        </div>
-                        <div class="gv-action-row">
-                            <button class="btn-pick-winner" id="btn-pick-winner" onclick="pickGiveawayWinner()">🎲 Выбрать победителя</button>
-                            <button class="btn-reset" onclick="resetGiveaway()">🔄 Сбросить</button>
-                        </div>
-                        <div class="gv-list-box">
-                            <div class="gv-list-title" id="gv-list-counter">Участники (0)</div>
-                            <div class="gv-badges-container" id="gv-users-container"></div>
-                        </div>
-                        <div class="gv-console-log" id="gv-console"></div>
+                    <span class="gv-label">Звук уведомления</span>
+                    <div class="audio-info">
+                        <span>🔊 Текущий: <strong>Windows 10</strong></span>
+                    </div>
+                    <button class="btn-giveaway" onclick="startGiveawayCollection()">Начать сбор</button>
+                    <div class="gv-hint-text">
+                        Зрители пишут ключевое слово в чат для участия. Победитель должен написать любое сообщение за указанное время.
                     </div>
                 </div>
-                <div class="gv-footer-left">
-                    <button class="btn-reload" onclick="window.location.reload()">🔄 Перезагрузить</button>
-                    <button class="btn-donate" onclick="openDonate()">💜 Поддержать домика <span id="gv-footer-nick">@domik_xdx</span></button>
+                <div id="gv-screen-live" class="gv-card" style="display: none;">
+                    <div style="text-align: center; font-size: 0.9rem; margin-bottom: 20px; color: var(--text-secondary);">
+                        Ключевое слово: <strong style="background: rgba(245,166,35,0.15); color: var(--giveaway); padding: 4px 10px; border-radius: 6px;" id="gv-live-keyword">+</strong>
+                    </div>
+                    <div class="gv-stats-grid">
+                        <div class="gv-stat-card">
+                            <div class="gv-stat-num" id="stat-users">0</div>
+                            <div class="gv-stat-lbl">Участников</div>
+                        </div>
+                        <div class="gv-stat-card">
+                            <div class="gv-stat-num" id="stat-messages">0</div>
+                            <div class="gv-stat-lbl">Сообщений</div>
+                        </div>
+                        <div class="gv-stat-card">
+                            <div class="gv-stat-num" id="stat-winners">0</div>
+                            <div class="gv-stat-lbl">Победителей</div>
+                        </div>
+                    </div>
+                    <div class="gv-action-row">
+                        <button class="btn-pick-winner" id="btn-pick-winner" onclick="pickGiveawayWinner()">🎲 Выбрать победителя</button>
+                        <button class="btn-reset" onclick="resetGiveaway()">🔄 Сбросить</button>
+                    </div>
+                    <div class="gv-list-box">
+                        <div class="gv-list-title" id="gv-list-counter">Участники (0)</div>
+                        <div class="gv-badges-container" id="gv-users-container"></div>
+                    </div>
+                    <div class="gv-console-log" id="gv-console"></div>
                 </div>
-                <div class="gv-footer-copy">Domik</div>
-            </section>
-
-            <!-- TAB: Song Battle -->
-            <section id="tab-song-battle" class="tab-content">
-                <div class="sb-container">
-                    <div class="sb-header">
-                        <span class="sb-icon">🎵</span>
-                        <h1 class="sb-title">Song Battle</h1>
-                        <span class="sb-subtitle">Песни сражаются 1 на 1. Чат голосует.</span>
-                    </div>
-                    <div id="sb-screen-setup" class="sb-card">
-                        <div class="sb-form">
-                            <div class="sb-field">
-                                <label>TWITCH КАНАЛ</label>
-                                <input type="text" id="sb-channel" readonly value="ваш_канал" />
-                            </div>
-                            <div class="sb-field">
-                                <label>ТЕМА БАТТЛА (НЕОБЯЗАТЕЛЬНО)</label>
-                                <input type="text" id="sb-theme" placeholder="Лучшие песни 2025" />
-                            </div>
-                            <div class="sb-row">
-                                <div class="sb-field">
-                                    <label>МАКС. ПЕСЕН ВСЕГО</label>
-                                    <input type="number" id="sb-max-songs" value="16" min="4" max="60" />
-                                </div>
-                                <div class="sb-field">
-                                    <label>НА ЧЕЛОВЕКА</label>
-                                    <input type="number" id="sb-per-user" value="1" min="1" max="5" />
-                                </div>
-                            </div>
-                            <button class="sb-btn-primary" onclick="startSongCollection()">НАЧАТЬ СБОР ПЕСЕН</button>
-                        </div>
-                        <div class="sb-footer">
-                            <button class="sb-btn-ghost" onclick="openGiveawayApp()">Войти по коду</button>
-                            <button class="sb-btn-ghost" onclick="openGiveawayApp()">Создать игру</button>
-                        </div>
-                    </div>
-                    <div id="sb-screen-collect" class="sb-card" style="display:none">
-                        <div class="sb-collect-header">
-                            <span>Сбор песен</span>
-                            <span>Чат пишет: <strong>!song ссылка</strong></span>
-                        </div>
-                        <div class="sb-progress">
-                            <span id="sb-song-count">0</span> / <span id="sb-max-songs-display">16</span> песен
-                        </div>
-                        <div class="sb-song-list" id="sb-song-list"></div>
-                        <div class="sb-actions">
-                            <button class="sb-btn-primary" id="sb-start-battle-btn" onclick="startBattle()" disabled>НАЧАТЬ БАТТЛ (мин. 4)</button>
-                            <button class="sb-btn-secondary" onclick="stopCollection()">Стоп сбор</button>
-                        </div>
-                        <div class="sb-settings-row">
-                            <span>НАСТРОЙКИ (ЛАЙВ)</span>
-                            <span>Макс. песен: <strong id="sb-max-songs-live">16</strong></span>
-                            <span>На человека: <strong id="sb-per-user-live">1</strong></span>
-                        </div>
-                        <div class="sb-manual-add">
-                            <span>Или добавь вручную:</span>
-                            <input type="text" id="sb-manual-url" placeholder="YouTube ссылка" />
-                            <button class="sb-btn-small" onclick="addManualSong()">+ Добавить</button>
-                        </div>
-                        <div class="sb-footer">
-                            <button class="sb-btn-ghost" onclick="openGiveawayApp()">Войти по коду</button>
-                            <button class="sb-btn-ghost" onclick="openGiveawayApp()">Создать игру</button>
-                        </div>
-                    </div>
-                    <div id="sb-screen-battle" class="sb-card" style="display:none">
-                        <div class="sb-battle-header">
-                            <span class="sb-pair-counter" id="sb-pair-counter">1 / 5</span>
-                            <span class="sb-timer" id="sb-timer">⏰ 00:00</span>
-                        </div>
-                        <div class="sb-pair">
-                            <div class="sb-song-card" id="sb-song1">
-                                <div class="sb-song-title"><a href="#" target="_blank" id="sb-song1-url">Песня 1</a></div>
-                                <div class="sb-song-author" id="sb-song1-author">Автор</div>
-                                <div class="sb-votes" id="sb-votes1">0</div>
-                                <div class="sb-player-wrapper" id="sb-player1">
-                                    <iframe id="sb-iframe1" width="100%" height="180" src="" frameborder="0" allowfullscreen></iframe>
-                                </div>
-                            </div>
-                            <div class="sb-vs">VS</div>
-                            <div class="sb-song-card" id="sb-song2">
-                                <div class="sb-song-title"><a href="#" target="_blank" id="sb-song2-url">Песня 2</a></div>
-                                <div class="sb-song-author" id="sb-song2-author">Автор</div>
-                                <div class="sb-votes" id="sb-votes2">0</div>
-                                <div class="sb-player-wrapper" id="sb-player2">
-                                    <iframe id="sb-iframe2" width="100%" height="180" src="" frameborder="0" allowfullscreen></iframe>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="sb-chat-hint">Чат пишет <strong>1</strong> или <strong>2</strong></div>
-                        <div class="sb-actions">
-                            <button class="sb-btn-secondary" onclick="skipPair()">Пропустить</button>
-                            <button class="sb-btn-secondary" onclick="endBattle()">Завершить баттл</button>
-                        </div>
-                        <div class="sb-footer">
-                            <button class="sb-btn-ghost" onclick="openGiveawayApp()">Войти по коду</button>
-                            <button class="sb-btn-ghost" onclick="openGiveawayApp()">Создать игру</button>
-                        </div>
-                    </div>
-                    <div id="sb-screen-winner" class="sb-card" style="display:none">
-                        <div class="sb-winner">
-                            <span class="sb-trophy">🏆</span>
-                            <h2>ПОБЕДИТЕЛЬ!</h2>
-                            <div class="sb-winner-song" id="sb-winner-song">Название песни</div>
-                            <div class="sb-winner-author" id="sb-winner-author">Автор</div>
-                        </div>
-                        <div class="sb-footer">
-                            <button class="sb-btn-primary" onclick="resetBattle()">Новый баттл</button>
-                            <button class="sb-btn-ghost" onclick="openGiveawayApp()">Войти по коду</button>
-                            <button class="sb-btn-ghost" onclick="openGiveawayApp()">Создать игру</button>
-                        </div>
-                    </div>
-                    <div class="sb-global-footer">
-                        <button class="btn-reload" onclick="window.location.reload()">🔄 если залагал — нажми</button>
-                        <button class="btn-donate" onclick="openDonate()">💜 Поддержать домика <span id="sb-footer-nick">@domik_xdx</span></button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TAB: Поле Чудес -->
-            <section id="tab-wheel" class="tab-content">
-                <div class="wheel-container">
-                    <div class="wheel-header">
-                        <span class="wheel-icon">🌐</span>
-                        <h1 class="wheel-title">ПОЛЕ ЧУДЕС</h1>
-                        <span class="wheel-subtitle">Twitch Chat Edition</span>
-                    </div>
-                    <div id="wheel-screen-setup" class="wheel-card">
-                        <div class="wheel-field">
-                            <label>TWITCH КАНАЛ</label>
-                            <input type="text" id="wheel-channel" readonly value="ваш_канал" />
-                        </div>
-                        <div class="wheel-field">
-                            <label>СЛОВО (СКРЫТО ОТ ЗРИТЕЛЕЙ)</label>
-                            <input type="text" id="wheel-word" placeholder="Введите слово..." />
-                        </div>
-                        <div class="wheel-field">
-                            <label>ПОДСКАЗКА</label>
-                            <input type="text" id="wheel-hint" placeholder="Категория или подсказка" />
-                        </div>
-                        <div class="wheel-field">
-                            <label>МАКС. ОШИБОК</label>
-                            <input type="number" id="wheel-max-attempts" value="6" min="1" max="10" />
-                        </div>
-                        <div class="wheel-field">
-                            <label>ВРЕМЯ НА СБОР (сек)</label>
-                            <input type="number" id="wheel-collect-time" value="30" min="10" max="120" />
-                        </div>
-                        <button class="wheel-btn-primary" onclick="wheelStartCollecting()">НАЧАТЬ ИГРУ</button>
-                        <div class="wheel-hint-text">
-                            Зрители пишут <strong>!join</strong> в чат, чтобы участвовать. После сбора начинается игра.
-                        </div>
-                    </div>
-                    <div id="wheel-screen-collect" class="wheel-card" style="display:none">
-                        <div class="wheel-collect-header">
-                            <span>Набор игроков</span>
-                            <span id="wheel-collect-timer">30с</span>
-                        </div>
-                        <div style="margin-top: 10px; color: var(--text-secondary);">
-                            Пишите <strong>!join</strong> в чате чтобы участвовать!
-                        </div>
-                        <div class="wheel-player-list" id="wheel-collect-players">
-                            <div>domik_xdx (стример)</div>
-                        </div>
-                        <div class="wheel-collect-count" id="wheel-collect-count">1 участников</div>
-                        <div class="wheel-actions">
-                            <button class="wheel-btn-primary" onclick="wheelForceStart()">Начать сейчас</button>
-                            <button class="wheel-btn-secondary" onclick="wheelCancel()">Отмена</button>
-                        </div>
-                    </div>
-                    <div id="wheel-screen-play" class="wheel-card" style="display:none">
-                        <div class="wheel-game-header">
-                            <div>
-                                <span class="wheel-hint-label">ПОДСКАЗКА:</span>
-                                <span id="wheel-hint-display">ФАЛЬВАФЫВЫ</span>
-                            </div>
-                            <div class="wheel-stats">
-                                <span id="wheel-revealed-count">0/6</span>
-                                <span id="wheel-attempts-display">0</span>
-                                <span id="wheel-players-count">0</span>
-                            </div>
-                        </div>
-                        <div class="wheel-word-display" id="wheel-word-display">
-                            _ _ _ _ _
-                        </div>
-                        <div class="wheel-scoreboard" id="wheel-scoreboard"></div>
-                        <div class="wheel-current-player" id="wheel-current-player">> domik_xdx</div>
-                        <div class="wheel-chat-commands">
-                            <span><strong>!spin</strong> — крутить барабан (для текущего игрока)</span>
-                            <span><strong>Буква</strong> — назвать букву</span>
-                            <span><strong>!word слово</strong> — угадать слово целиком</span>
-                        </div>
-                    </div>
-                    <div class="wheel-global-footer">
-                        <button class="btn-reload" onclick="window.location.reload()">🔄 если залагало — нажми</button>
-                        <button class="btn-donate" onclick="openDonate()">💜 Поддержать домика <span id="wheel-footer-nick">@domik_xdx</span></button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TAB: Guess the Word -->
-            <section id="tab-guess" class="tab-content">
-                <div class="guess-container">
-                    <div class="guess-header">
-                        <span class="guess-icon">💡</span>
-                        <h1 class="guess-title">GUESS THE WORD</h1>
-                        <span class="guess-subtitle">Чат описывает слово — стример угадывает!</span>
-                    </div>
-                    <div id="guess-screen-setup" class="guess-card">
-                        <div class="guess-field">
-                            <label>TWITCH-КАНАЛ</label>
-                            <input type="text" id="guess-channel" readonly value="ваш_канал" />
-                        </div>
-                        <div class="guess-field">
-                            <label>ИСТОЧНИК СЛОВ</label>
-                            <select id="guess-source">
-                                <option value="builtin">Встроенные</option>
-                                <option value="chat">Чат предлагает</option>
-                            </select>
-                        </div>
-                        <div class="guess-field">
-                            <label>КАТЕГОРИЯ</label>
-                            <select id="guess-category">
-                                <option value="all">Все</option>
-                                <option value="animals">Животные</option>
-                                <option value="food">Еда</option>
-                                <option value="things">Предметы</option>
-                                <option value="nature">Природа</option>
-                                <option value="transport">Транспорт</option>
-                                <option value="sports">Спорт</option>
-                                <option value="twitch">Twitch</option>
-                                <option value="fantasy">Фэнтези</option>
-                                <option value="movies">Фильмы</option>
-                                <option value="music">Музыка</option>
-                                <option value="jobs">Профессии</option>
-                            </select>
-                        </div>
-                        <div class="guess-row">
-                            <div class="guess-field">
-                                <label>ВРЕМЯ ПОКАЗА СЛОВА (СЕК)</label>
-                                <input type="number" id="guess-show-time" value="3" min="1" max="10" />
-                            </div>
-                            <div class="guess-field">
-                                <label>РАУНДОВ</label>
-                                <input type="number" id="guess-rounds" value="5" min="1" max="20" />
-                            </div>
-                        </div>
-                        <button class="guess-btn-primary" onclick="guessStartGame()">Начать игру</button>
-                        <div class="guess-hint-text">
-                            Стример отворачивается — чату показывают слово. Чат описывает его, не называя. Стример угадывает!
-                        </div>
-                    </div>
-                    <div id="guess-screen-show" class="guess-card" style="display:none">
-                        <div class="guess-show-header">
-                            <span>СТРИМЕР, ОТВЕРНИСЬ!</span>
-                            <span id="guess-show-round">1</span>
-                        </div>
-                        <div class="guess-show-word" id="guess-show-word">НИНДЗЯ</div>
-                        <div class="guess-show-timer" id="guess-show-timer">⏰ 3</div>
-                        <div class="guess-show-hint">Чат, запомните!</div>
-                    </div>
-                    <div id="guess-screen-play" class="guess-card" style="display:none">
-                        <div class="guess-play-header">
-                            <span>Раунд <span id="guess-play-round">1</span>/<span id="guess-play-total">5</span></span>
-                            <span>Очки: <span id="guess-play-score">0</span></span>
-                            <span>Попыток: <span id="guess-play-attempts">0</span></span>
-                        </div>
-                        <div class="guess-play-system" id="guess-play-system">
-                            ▼ Система: Чат, описывайте слово! Не называйте его!
-                        </div>
-                        <div class="guess-play-chat" id="guess-play-chat"></div>
-                        <div class="guess-play-input">
-                            <input type="text" id="guess-input" placeholder="Твоя догадка..." />
-                            <button class="guess-btn-primary" onclick="guessAttempt()">Угадать</button>
-                        </div>
-                        <div class="guess-play-actions">
-                            <button class="guess-btn-secondary" onclick="guessGiveUp()">Сдаюсь</button>
-                            <button class="guess-btn-secondary" id="guess-next-btn" onclick="guessNext()" style="display:none;">Следующее слово →</button>
-                        </div>
-                    </div>
-                    <div id="guess-screen-finish" class="guess-card" style="display:none">
-                        <div class="guess-finish-title">🏁 Игра завершена!</div>
-                        <div class="guess-finish-score">Очки: <span id="guess-finish-score">0</span> / <span id="guess-finish-total">5</span></div>
-                        <button class="guess-btn-primary" onclick="guessCancel()">Закрыть</button>
-                    </div>
-                    <div class="guess-global-footer">
-                        <button class="btn-reload" onclick="window.location.reload()">🔄 если залагало — нажми</button>
-                        <button class="btn-donate" onclick="openDonate()">💜 Поддержать домика <span id="guess-footer-nick">@domik_xdx</span></button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Save Bar -->
-            <div class="save-bar" id="global-save-bar">
-                <button class="btn-success" onclick="saveConfig()">💾 Сохранить настройки</button>
             </div>
-        </main>
-    </div>
-        <script>
-        // ================================================================
-        //  ПОЛНЫЙ КЛИЕНТСКИЙ КОД (для index.html)
-        // ================================================================
-        const TWITCH_CLIENT_ID = 'n71zv0v6u6l5uxc50toagqd87a1n7z';
-        const BACKEND_URL = 'https://domikbot-12-production.up.railway.app'; // замените на ваш сервер
-        const DONATE_URL = 'https://www.donationalerts.com/r/xxx_domik_xxx';
+            <div class="gv-footer-left">
+                <button class="btn-reload" onclick="window.location.reload()">🔄 Перезагрузить</button>
+                <button class="btn-donate" onclick="openDonate()">💜 Поддержать домика <span id="gv-footer-nick">@domik_xdx</span></button>
+            </div>
+            <div class="gv-footer-copy">Domik</div>
+        </section>
 
-        let currentUser = 'domik_xdx';
-        let localConfig = { commands: {}, announcements: [], interval: 10 };
-        let socket = null;
-        let giveawayActive = false;
-        let giveawayWinner = null;
-        let registeredUsers = new Set();
-        let totalMessagesChecked = 0;
-        let winnerTimer = null;
-        const FIXED_SOUND = 'Windows 10';
+        <!-- TAB: Song Battle -->
+        <section id="tab-song-battle" class="tab-content">
+            <div class="sb-container">
+                <div class="sb-header">
+                    <span class="sb-icon">🎵</span>
+                    <h1 class="sb-title">Song Battle</h1>
+                    <span class="sb-subtitle">Песни сражаются 1 на 1. Чат голосует.</span>
+                </div>
+                <div id="sb-screen-setup" class="sb-card">
+                    <div class="sb-form">
+                        <div class="sb-field">
+                            <label>TWITCH КАНАЛ</label>
+                            <input type="text" id="sb-channel" readonly value="ваш_канал" />
+                        </div>
+                        <div class="sb-field">
+                            <label>ТЕМА БАТТЛА (НЕОБЯЗАТЕЛЬНО)</label>
+                            <input type="text" id="sb-theme" placeholder="Лучшие песни 2025" />
+                        </div>
+                        <div class="sb-row">
+                            <div class="sb-field">
+                                <label>МАКС. ПЕСЕН ВСЕГО</label>
+                                <input type="number" id="sb-max-songs" value="16" min="4" max="60" />
+                            </div>
+                            <div class="sb-field">
+                                <label>НА ЧЕЛОВЕКА</label>
+                                <input type="number" id="sb-per-user" value="1" min="1" max="5" />
+                            </div>
+                        </div>
+                        <button class="sb-btn-primary" onclick="startSongCollection()">НАЧАТЬ СБОР ПЕСЕН</button>
+                    </div>
+                    <div class="sb-footer">
+                        <button class="sb-btn-ghost" onclick="openGiveawayApp()">Войти по коду</button>
+                        <button class="sb-btn-ghost" onclick="openGiveawayApp()">Создать игру</button>
+                    </div>
+                </div>
+                <div id="sb-screen-collect" class="sb-card" style="display:none">
+                    <div class="sb-collect-header">
+                        <span>Сбор песен</span>
+                        <span>Чат пишет: <strong>!song ссылка</strong></span>
+                    </div>
+                    <div class="sb-progress">
+                        <span id="sb-song-count">0</span> / <span id="sb-max-songs-display">16</span> песен
+                    </div>
+                    <div class="sb-song-list" id="sb-song-list"></div>
+                    <div class="sb-actions">
+                        <button class="sb-btn-primary" id="sb-start-battle-btn" onclick="startBattle()" disabled>НАЧАТЬ БАТТЛ (мин. 4)</button>
+                        <button class="sb-btn-secondary" onclick="stopCollection()">Стоп сбор</button>
+                    </div>
+                    <div class="sb-settings-row">
+                        <span>НАСТРОЙКИ (ЛАЙВ)</span>
+                        <span>Макс. песен: <strong id="sb-max-songs-live">16</strong></span>
+                        <span>На человека: <strong id="sb-per-user-live">1</strong></span>
+                    </div>
+                    <div class="sb-manual-add">
+                        <span>Или добавь вручную:</span>
+                        <input type="text" id="sb-manual-url" placeholder="YouTube ссылка" />
+                        <button class="sb-btn-small" onclick="addManualSong()">+ Добавить</button>
+                    </div>
+                    <div class="sb-footer">
+                        <button class="sb-btn-ghost" onclick="openGiveawayApp()">Войти по коду</button>
+                        <button class="sb-btn-ghost" onclick="openGiveawayApp()">Создать игру</button>
+                    </div>
+                </div>
+                <div id="sb-screen-battle" class="sb-card" style="display:none">
+                    <div class="sb-battle-header">
+                        <span class="sb-pair-counter" id="sb-pair-counter">1 / 5</span>
+                        <span class="sb-timer" id="sb-timer">⏰ 00:00</span>
+                    </div>
+                    <div class="sb-pair">
+                        <div class="sb-song-card" id="sb-song1">
+                            <div class="sb-song-title"><a href="#" target="_blank" id="sb-song1-url">Песня 1</a></div>
+                            <div class="sb-song-author" id="sb-song1-author">Автор</div>
+                            <div class="sb-votes" id="sb-votes1">0</div>
+                            <div class="sb-player-wrapper" id="sb-player1">
+                                <iframe id="sb-iframe1" width="100%" height="180" src="" frameborder="0" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                        <div class="sb-vs">VS</div>
+                        <div class="sb-song-card" id="sb-song2">
+                            <div class="sb-song-title"><a href="#" target="_blank" id="sb-song2-url">Песня 2</a></div>
+                            <div class="sb-song-author" id="sb-song2-author">Автор</div>
+                            <div class="sb-votes" id="sb-votes2">0</div>
+                            <div class="sb-player-wrapper" id="sb-player2">
+                                <iframe id="sb-iframe2" width="100%" height="180" src="" frameborder="0" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sb-chat-hint">Чат пишет <strong>1</strong> или <strong>2</strong></div>
+                    <div class="sb-actions">
+                        <button class="sb-btn-secondary" onclick="skipPair()">Пропустить</button>
+                        <button class="sb-btn-secondary" onclick="endBattle()">Завершить баттл</button>
+                    </div>
+                    <div class="sb-footer">
+                        <button class="sb-btn-ghost" onclick="openGiveawayApp()">Войти по коду</button>
+                        <button class="sb-btn-ghost" onclick="openGiveawayApp()">Создать игру</button>
+                    </div>
+                </div>
+                <div id="sb-screen-winner" class="sb-card" style="display:none">
+                    <div class="sb-winner">
+                        <span class="sb-trophy">🏆</span>
+                        <h2>ПОБЕДИТЕЛЬ!</h2>
+                        <div class="sb-winner-song" id="sb-winner-song">Название песни</div>
+                        <div class="sb-winner-author" id="sb-winner-author">Автор</div>
+                    </div>
+                    <div class="sb-footer">
+                        <button class="sb-btn-primary" onclick="resetBattle()">Новый баттл</button>
+                        <button class="sb-btn-ghost" onclick="openGiveawayApp()">Войти по коду</button>
+                        <button class="sb-btn-ghost" onclick="openGiveawayApp()">Создать игру</button>
+                    </div>
+                </div>
+                <div class="sb-global-footer">
+                    <button class="btn-reload" onclick="window.location.reload()">🔄 если залагал — нажми</button>
+                    <button class="btn-donate" onclick="openDonate()">💜 Поддержать домика <span id="sb-footer-nick">@domik_xdx</span></button>
+                </div>
+            </div>
+        </section>
 
-        window.onload = function() {
-            const params = new URLSearchParams(window.location.search);
-            const app = params.get('app');
-            if (app) {
-                document.body.classList.add('standalone-mode');
-                switchTabByApp(app);
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-            const openInNew = localStorage.getItem('open_in_new_window') === 'true';
-            document.getElementById('open-in-new-window').checked = openInNew;
-            document.getElementById('open-in-new-window').addEventListener('change', function() {
-                localStorage.setItem('open_in_new_window', this.checked);
-            });
-            checkAuth();
-            setupSocket();
-            document.getElementById('bot-toggle').addEventListener('change', onBotToggle);
-        };
+        <!-- TAB: Поле Чудес -->
+        <section id="tab-wheel" class="tab-content">
+            <div class="wheel-container">
+                <div class="wheel-header">
+                    <span class="wheel-icon">🌐</span>
+                    <h1 class="wheel-title">ПОЛЕ ЧУДЕС</h1>
+                    <span class="wheel-subtitle">Twitch Chat Edition</span>
+                </div>
+                <div id="wheel-screen-setup" class="wheel-card">
+                    <div class="wheel-field">
+                        <label>TWITCH КАНАЛ</label>
+                        <input type="text" id="wheel-channel" readonly value="ваш_канал" />
+                    </div>
+                    <div class="wheel-field">
+                        <label>СЛОВО (СКРЫТО ОТ ЗРИТЕЛЕЙ)</label>
+                        <input type="text" id="wheel-word" placeholder="Введите слово..." />
+                    </div>
+                    <div class="wheel-field">
+                        <label>ПОДСКАЗКА</label>
+                        <input type="text" id="wheel-hint" placeholder="Категория или подсказка" />
+                    </div>
+                    <div class="wheel-field">
+                        <label>МАКС. ОШИБОК</label>
+                        <input type="number" id="wheel-max-attempts" value="6" min="1" max="10" />
+                    </div>
+                    <div class="wheel-field">
+                        <label>ВРЕМЯ НА СБОР (сек)</label>
+                        <input type="number" id="wheel-collect-time" value="30" min="10" max="120" />
+                    </div>
+                    <button class="wheel-btn-primary" onclick="wheelStartCollecting()">НАЧАТЬ ИГРУ</button>
+                    <div class="wheel-hint-text">
+                        Зрители пишут <strong>!join</strong> в чат, чтобы участвовать. После сбора начинается игра.
+                    </div>
+                </div>
+                <div id="wheel-screen-collect" class="wheel-card" style="display:none">
+                    <div class="wheel-collect-header">
+                        <span>Набор игроков</span>
+                        <span id="wheel-collect-timer">30с</span>
+                    </div>
+                    <div style="margin-top: 10px; color: var(--text-secondary);">
+                        Пишите <strong>!join</strong> в чате чтобы участвовать!
+                    </div>
+                    <div class="wheel-player-list" id="wheel-collect-players">
+                        <div>domik_xdx (стример)</div>
+                    </div>
+                    <div class="wheel-collect-count" id="wheel-collect-count">1 участников</div>
+                    <div class="wheel-actions">
+                        <button class="wheel-btn-primary" onclick="wheelForceStart()">Начать сейчас</button>
+                        <button class="wheel-btn-secondary" onclick="wheelCancel()">Отмена</button>
+                    </div>
+                </div>
+                <div id="wheel-screen-play" class="wheel-card" style="display:none">
+                    <div class="wheel-game-header">
+                        <div>
+                            <span class="wheel-hint-label">ПОДСКАЗКА:</span>
+                            <span id="wheel-hint-display">ФАЛЬВАФЫВЫ</span>
+                        </div>
+                        <div class="wheel-stats">
+                            <span id="wheel-revealed-count">0/6</span>
+                            <span id="wheel-attempts-display">0</span>
+                            <span id="wheel-players-count">0</span>
+                        </div>
+                    </div>
+                    <div class="wheel-word-display" id="wheel-word-display">
+                        _ _ _ _ _
+                    </div>
+                    <div class="wheel-scoreboard" id="wheel-scoreboard"></div>
+                    <div class="wheel-current-player" id="wheel-current-player">> domik_xdx</div>
+                    <div class="wheel-chat-commands">
+                        <span><strong>!spin</strong> — крутить барабан (для текущего игрока)</span>
+                        <span><strong>Буква</strong> — назвать букву</span>
+                        <span><strong>!word слово</strong> — угадать слово целиком</span>
+                    </div>
+                </div>
+                <div class="wheel-global-footer">
+                    <button class="btn-reload" onclick="window.location.reload()">🔄 если залагало — нажми</button>
+                    <button class="btn-donate" onclick="openDonate()">💜 Поддержать домика <span id="wheel-footer-nick">@domik_xdx</span></button>
+                </div>
+            </div>
+        </section>
 
-        // ===== AUTH =====
-        function checkAuth() {
-            const hash = window.location.hash;
-            if (hash) {
-                const params = new URLSearchParams(hash.substring(1));
-                const token = params.get('access_token');
-                if (token) {
-                    localStorage.setItem('domik_bot_token', token);
-                    localStorage.setItem('domik_bot_logged_in', 'true');
-                    history.replaceState(null, null, window.location.pathname);
-                }
-            }
-            const isLoggedIn = localStorage.getItem('domik_bot_logged_in') === 'true';
-            const token = localStorage.getItem('domik_bot_token');
-            if (isLoggedIn && token) {
-                document.getElementById('login-page').style.display = 'none';
-                document.getElementById('main-dashboard').style.display = 'flex';
-                fetchTwitchUserData(token);
-            } else {
-                document.getElementById('login-page').style.display = 'flex';
-                document.getElementById('main-dashboard').style.display = 'none';
-            }
+        <!-- TAB: Guess the Word -->
+        <section id="tab-guess" class="tab-content">
+            <div class="guess-container">
+                <div class="guess-header">
+                    <span class="guess-icon">💡</span>
+                    <h1 class="guess-title">GUESS THE WORD</h1>
+                    <span class="guess-subtitle">Чат описывает слово — стример угадывает!</span>
+                </div>
+                <div id="guess-screen-setup" class="guess-card">
+                    <div class="guess-field">
+                        <label>TWITCH-КАНАЛ</label>
+                        <input type="text" id="guess-channel" readonly value="ваш_канал" />
+                    </div>
+                    <div class="guess-field">
+                        <label>ИСТОЧНИК СЛОВ</label>
+                        <select id="guess-source">
+                            <option value="builtin">Встроенные</option>
+                            <option value="chat">Чат предлагает</option>
+                        </select>
+                    </div>
+                    <div class="guess-field">
+                        <label>КАТЕГОРИЯ</label>
+                        <select id="guess-category">
+                            <option value="all">Все</option>
+                            <option value="animals">Животные</option>
+                            <option value="food">Еда</option>
+                            <option value="things">Предметы</option>
+                            <option value="nature">Природа</option>
+                            <option value="transport">Транспорт</option>
+                            <option value="sports">Спорт</option>
+                            <option value="twitch">Twitch</option>
+                            <option value="fantasy">Фэнтези</option>
+                            <option value="movies">Фильмы</option>
+                            <option value="music">Музыка</option>
+                            <option value="jobs">Профессии</option>
+                        </select>
+                    </div>
+                    <div class="guess-row">
+                        <div class="guess-field">
+                            <label>ВРЕМЯ ПОКАЗА СЛОВА (СЕК)</label>
+                            <input type="number" id="guess-show-time" value="3" min="1" max="10" />
+                        </div>
+                        <div class="guess-field">
+                            <label>РАУНДОВ</label>
+                            <input type="number" id="guess-rounds" value="5" min="1" max="20" />
+                        </div>
+                    </div>
+                    <button class="guess-btn-primary" onclick="guessStartGame()">Начать игру</button>
+                    <div class="guess-hint-text">
+                        Стример отворачивается — чату показывают слово. Чат описывает его, не называя. Стример угадывает!
+                    </div>
+                </div>
+                <div id="guess-screen-show" class="guess-card" style="display:none">
+                    <div class="guess-show-header">
+                        <span>СТРИМЕР, ОТВЕРНИСЬ!</span>
+                        <span id="guess-show-round">1</span>
+                    </div>
+                    <div class="guess-show-word" id="guess-show-word">НИНДЗЯ</div>
+                    <div class="guess-show-timer" id="guess-show-timer">⏰ 3</div>
+                    <div class="guess-show-hint">Чат, запомните!</div>
+                </div>
+                <div id="guess-screen-play" class="guess-card" style="display:none">
+                    <div class="guess-play-header">
+                        <span>Раунд <span id="guess-play-round">1</span>/<span id="guess-play-total">5</span></span>
+                        <span>Очки: <span id="guess-play-score">0</span></span>
+                        <span>Попыток: <span id="guess-play-attempts">0</span></span>
+                    </div>
+                    <div class="guess-play-system" id="guess-play-system">
+                        ▼ Система: Чат, описывайте слово! Не называйте его!
+                    </div>
+                    <div class="guess-play-chat" id="guess-play-chat"></div>
+                    <div class="guess-play-input">
+                        <input type="text" id="guess-input" placeholder="Твоя догадка..." />
+                        <button class="guess-btn-primary" onclick="guessAttempt()">Угадать</button>
+                    </div>
+                    <div class="guess-play-actions">
+                        <button class="guess-btn-secondary" onclick="guessGiveUp()">Сдаюсь</button>
+                        <button class="guess-btn-secondary" id="guess-next-btn" onclick="guessNext()" style="display:none;">Следующее слово →</button>
+                    </div>
+                </div>
+                <div id="guess-screen-finish" class="guess-card" style="display:none">
+                    <div class="guess-finish-title">🏁 Игра завершена!</div>
+                    <div class="guess-finish-score">Очки: <span id="guess-finish-score">0</span> / <span id="guess-finish-total">5</span></div>
+                    <button class="guess-btn-primary" onclick="guessCancel()">Закрыть</button>
+                </div>
+                <div class="guess-global-footer">
+                    <button class="btn-reload" onclick="window.location.reload()">🔄 если залагало — нажми</button>
+                    <button class="btn-donate" onclick="openDonate()">💜 Поддержать домика <span id="guess-footer-nick">@domik_xdx</span></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Save Bar -->
+        <div class="save-bar" id="global-save-bar">
+            <button class="btn-success" onclick="saveConfig()">💾 Сохранить настройки</button>
+        </div>
+
+    </main>
+</div>
+
+<script>
+// ================================================================
+// ПОЛНЫЙ КЛИЕНТСКИЙ КОД (без тумблера, с автоподключением)
+// ================================================================
+const TWITCH_CLIENT_ID = 'n71zv0v6u6l5uxc50toagqd87a1n7z';
+const BACKEND_URL = 'https://domikbot-12-production.up.railway.app'; // ЗАМЕНИТЕ НА ВАШ URL
+const DONATE_URL = 'https://www.donationalerts.com/r/xxx_domik_xxx';
+
+let currentUser = 'domik_xdx';
+let localConfig = { commands: {}, announcements: [], interval: 10 };
+let socket = null;
+let giveawayActive = false;
+let giveawayWinner = null;
+let registeredUsers = new Set();
+let totalMessagesChecked = 0;
+let winnerTimer = null;
+
+window.onload = function() {
+    const params = new URLSearchParams(window.location.search);
+    const app = params.get('app');
+    if (app) {
+        document.body.classList.add('standalone-mode');
+        switchTabByApp(app);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    const openInNew = localStorage.getItem('open_in_new_window') === 'true';
+    document.getElementById('open-in-new-window').checked = openInNew;
+    document.getElementById('open-in-new-window').addEventListener('change', function() {
+        localStorage.setItem('open_in_new_window', this.checked);
+    });
+    checkAuth();
+    setupSocket();
+};
+
+// ===== AUTH =====
+function checkAuth() {
+    const hash = window.location.hash;
+    if (hash) {
+        const params = new URLSearchParams(hash.substring(1));
+        const token = params.get('access_token');
+        if (token) {
+            localStorage.setItem('domik_bot_token', token);
+            localStorage.setItem('domik_bot_logged_in', 'true');
+            history.replaceState(null, null, window.location.pathname);
         }
+    }
+    const isLoggedIn = localStorage.getItem('domik_bot_logged_in') === 'true';
+    const token = localStorage.getItem('domik_bot_token');
+    if (isLoggedIn && token) {
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('main-dashboard').style.display = 'flex';
+        fetchTwitchUserData(token);
+    } else {
+        document.getElementById('login-page').style.display = 'flex';
+        document.getElementById('main-dashboard').style.display = 'none';
+    }
+}
 
-        function loginWithTwitch() {
-            const scopes = 'user:read:email chat:read chat:edit';
-            const redirect = window.location.origin + window.location.pathname;
-            window.location.href =
-                `https://id.twitch.tv/oauth2/authorize?client_id=${TWITCH_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirect)}&response_type=token&scope=${encodeURIComponent(scopes)}&force_verify=true`;
-        }
+function loginWithTwitch() {
+    const scopes = 'user:read:email chat:read chat:edit';
+    const redirect = window.location.origin + window.location.pathname;
+    window.location.href =
+        `https://id.twitch.tv/oauth2/authorize?client_id=${TWITCH_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirect)}&response_type=token&scope=${encodeURIComponent(scopes)}&force_verify=true`;
+}
 
-        function logout() {
-            localStorage.removeItem('domik_bot_logged_in');
-            localStorage.removeItem('domik_bot_token');
-            window.location.href = window.location.pathname;
-        }
+function logout() {
+    localStorage.removeItem('domik_bot_logged_in');
+    localStorage.removeItem('domik_bot_token');
+    window.location.href = window.location.pathname;
+}
 
-        async function fetchTwitchUserData(token) {
-            try {
-                const res = await fetch('https://api.twitch.tv/helix/users', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Client-Id': TWITCH_CLIENT_ID
-                    }
-                });
-                const data = await res.json();
-                if (data.data && data.data.length > 0) {
-                    const user = data.data[0];
-                    currentUser = user.login;
-                    document.getElementById('user-name').textContent = user.display_name;
-                    document.getElementById('user-avatar').src = user.profile_image_url;
-                    document.getElementById('settings-channel-name').textContent = '@' + currentUser;
-                    document.getElementById('gv-twitch-username').textContent = '@' + currentUser;
-                    document.getElementById('gv-footer-nick').textContent = '@' + currentUser;
-                    document.getElementById('gv-avatar-letter').textContent = currentUser.charAt(0).toUpperCase();
-                    document.getElementById('sb-channel').value = currentUser;
-                    document.getElementById('sb-footer-nick').textContent = '@' + currentUser;
-                    document.getElementById('wheel-channel').value = currentUser;
-                    document.getElementById('wheel-footer-nick').textContent = '@' + currentUser;
-                    document.getElementById('guess-channel').value = currentUser;
-                    document.getElementById('guess-footer-nick').textContent = '@' + currentUser;
-                    if (socket) {
-                        socket.emit('auth', { channel: currentUser, token });
-                    }
-                    loadConfig();
-                }
-            } catch (e) {
-                console.error('Ошибка получения данных пользователя:', e);
-                setupDemoUser();
+async function fetchTwitchUserData(token) {
+    try {
+        const res = await fetch('https://api.twitch.tv/helix/users', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Client-Id': TWITCH_CLIENT_ID
             }
-        }
-
-        function setupDemoUser() {
-            currentUser = 'domik_xdx';
-            document.getElementById('user-name').textContent = 'Domik_XDX';
-            document.getElementById('user-avatar').src = 'https://id.twitch.tv/static/images/badges/moderator.png';
+        });
+        const data = await res.json();
+        if (data.data && data.data.length > 0) {
+            const user = data.data[0];
+            currentUser = user.login;
+            document.getElementById('user-name').textContent = user.display_name;
+            document.getElementById('user-avatar').src = user.profile_image_url;
             document.getElementById('settings-channel-name').textContent = '@' + currentUser;
             document.getElementById('gv-twitch-username').textContent = '@' + currentUser;
             document.getElementById('gv-footer-nick').textContent = '@' + currentUser;
@@ -1225,711 +1166,746 @@ input:focus, select:focus { border-color: var(--accent); }
             document.getElementById('wheel-footer-nick').textContent = '@' + currentUser;
             document.getElementById('guess-channel').value = currentUser;
             document.getElementById('guess-footer-nick').textContent = '@' + currentUser;
+            if (socket) {
+                socket.emit('auth', { channel: currentUser, token });
+                // === АВТОМАТИЧЕСКОЕ ПОДКЛЮЧЕНИЕ БОТА ===
+                socket.emit('set_bot_status', { channel: currentUser, active: true });
+            }
             loadConfig();
         }
+    } catch (e) {
+        console.error('Ошибка получения данных пользователя:', e);
+        setupDemoUser();
+    }
+}
 
-        // ===== WEBSOCKET =====
-        function setupSocket() {
-            try {
-                socket = io(BACKEND_URL);
-                socket.on('connect', () => console.log('✅ WebSocket connected'));
-                socket.on('disconnect', () => console.warn('⚠️ WebSocket disconnected'));
+function setupDemoUser() {
+    currentUser = 'domik_xdx';
+    document.getElementById('user-name').textContent = 'Domik_XDX';
+    document.getElementById('user-avatar').src = 'https://id.twitch.tv/static/images/badges/moderator.png';
+    document.getElementById('settings-channel-name').textContent = '@' + currentUser;
+    document.getElementById('gv-twitch-username').textContent = '@' + currentUser;
+    document.getElementById('gv-footer-nick').textContent = '@' + currentUser;
+    document.getElementById('gv-avatar-letter').textContent = currentUser.charAt(0).toUpperCase();
+    document.getElementById('sb-channel').value = currentUser;
+    document.getElementById('sb-footer-nick').textContent = '@' + currentUser;
+    document.getElementById('wheel-channel').value = currentUser;
+    document.getElementById('wheel-footer-nick').textContent = '@' + currentUser;
+    document.getElementById('guess-channel').value = currentUser;
+    document.getElementById('guess-footer-nick').textContent = '@' + currentUser;
+    loadConfig();
+}
 
-                socket.on('chatMessage', (data) => {
-                    if (data.channel !== currentUser) return;
-                    handleChatMessage(data);
-                    const guessTab = document.getElementById('tab-guess');
-                    if (guessTab && guessTab.classList.contains('active')) {
-                        const chatContainer = document.getElementById('guess-play-chat');
-                        if (chatContainer) {
-                            const div = document.createElement('div');
-                            div.className = 'msg';
-                            div.innerHTML = `<span class="user">${escapeHTML(data.user)}:</span> ${escapeHTML(data.message)}`;
-                            chatContainer.appendChild(div);
-                            chatContainer.scrollTop = chatContainer.scrollHeight;
-                            if (chatContainer.children.length > 50) {
-                                chatContainer.removeChild(chatContainer.firstChild);
-                            }
-                        }
+// ===== WEBSOCKET =====
+function setupSocket() {
+    try {
+        socket = io(BACKEND_URL);
+        socket.on('connect', () => console.log('✅ WebSocket connected'));
+        socket.on('disconnect', () => console.warn('⚠️ WebSocket disconnected'));
+
+        socket.on('chatMessage', (data) => {
+            if (data.channel !== currentUser) return;
+            handleChatMessage(data);
+            const guessTab = document.getElementById('tab-guess');
+            if (guessTab && guessTab.classList.contains('active')) {
+                const chatContainer = document.getElementById('guess-play-chat');
+                if (chatContainer) {
+                    const div = document.createElement('div');
+                    div.className = 'msg';
+                    div.innerHTML = `<span class="user">${escapeHTML(data.user)}:</span> ${escapeHTML(data.message)}`;
+                    chatContainer.appendChild(div);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                    if (chatContainer.children.length > 50) {
+                        chatContainer.removeChild(chatContainer.firstChild);
                     }
-                });
-
-                socket.on('bot_status_changed', (data) => {
-                    if (data.channel === currentUser) updateBotStatusUI(data.active);
-                });
-
-                socket.on('battle_update', (data) => {
-                    if (data.channel === currentUser) renderBattleState(data.battle);
-                });
-                socket.on('battle_timer', (data) => {
-                    if (data.channel === currentUser) {
-                        document.getElementById('sb-timer').textContent = '⏰ 00:' + String(data.timeLeft).padStart(2, '0');
-                    }
-                });
-                socket.on('battle_error', (err) => alert('Ошибка: ' + err));
-
-                socket.on('giveaway_update', (data) => {
-                    if (data.channel !== currentUser) return;
-                    const container = document.getElementById('gv-users-container');
-                    container.innerHTML = '';
-                    data.users.forEach(user => {
-                        container.innerHTML += `<div class="gv-user-badge">${escapeHTML(user)}</div>`;
-                    });
-                    document.getElementById('stat-users').textContent = data.count;
-                    document.getElementById('gv-list-counter').textContent = `Участники (${data.count})`;
-                });
-
-                socket.on('wheel_state', (data) => {
-                    if (data.channel !== currentUser) return;
-                    renderWheelState(data.state);
-                });
-                socket.on('wheel_timer', (data) => {
-                    if (data.channel !== currentUser) return;
-                    document.getElementById('wheel-collect-timer').textContent = data.timeLeft + 'с';
-                });
-
-                socket.on('guess_word_show', (data) => {
-                    if (data.channel !== currentUser) return;
-                    document.getElementById('guess-screen-setup').style.display = 'none';
-                    document.getElementById('guess-screen-show').style.display = 'block';
-                    document.getElementById('guess-screen-play').style.display = 'none';
-                    document.getElementById('guess-screen-finish').style.display = 'none';
-                    document.getElementById('guess-show-word').textContent = data.word;
-                    document.getElementById('guess-show-round').textContent = data.round;
-                    document.getElementById('guess-show-timer').textContent = '⏰ ' + data.time;
-                    document.getElementById('guess-play-chat').innerHTML = '';
-                    let remaining = data.time;
-                    const interval = setInterval(() => {
-                        remaining--;
-                        document.getElementById('guess-show-timer').textContent = '⏰ ' + remaining;
-                        if (remaining <= 0) clearInterval(interval);
-                    }, 1000);
-                });
-                socket.on('guess_word_playing', (data) => {
-                    if (data.channel !== currentUser) return;
-                    document.getElementById('guess-screen-show').style.display = 'none';
-                    document.getElementById('guess-screen-play').style.display = 'block';
-                    document.getElementById('guess-screen-finish').style.display = 'none';
-                    document.getElementById('guess-play-round').textContent = data.round;
-                    document.getElementById('guess-play-total').textContent = data.total;
-                    document.getElementById('guess-play-score').textContent = data.score;
-                    document.getElementById('guess-play-attempts').textContent = data.attempts;
-                    document.getElementById('guess-next-btn').style.display = 'none';
-                    document.getElementById('guess-input').value = '';
-                    document.getElementById('guess-input').disabled = false;
-                    document.getElementById('guess-input').focus();
-                });
-                socket.on('guess_correct', (data) => {
-                    if (data.channel !== currentUser) return;
-                    document.getElementById('guess-play-score').textContent = data.score;
-                    document.getElementById('guess-next-btn').style.display = 'inline-block';
-                    document.getElementById('guess-input').disabled = true;
-                    document.getElementById('guess-play-system').innerHTML = '✅ Правильно! Слово: ' + data.word;
-                });
-                socket.on('guess_wrong', (data) => {
-                    if (data.channel !== currentUser) return;
-                    document.getElementById('guess-play-attempts').textContent = data.attempts;
-                    if (data.attempts >= data.maxAttempts) {
-                        document.getElementById('guess-play-system').innerHTML = '❌ Попыток больше нет! Слово будет показано.';
-                        document.getElementById('guess-input').disabled = true;
-                        setTimeout(() => {
-                            document.getElementById('guess-next-btn').style.display = 'inline-block';
-                        }, 1500);
-                    } else {
-                        document.getElementById('guess-play-system').innerHTML = '❌ Неправильно! Попробуйте ещё.';
-                    }
-                    document.getElementById('guess-input').value = '';
-                    document.getElementById('guess-input').focus();
-                });
-                socket.on('guess_finished', (data) => {
-                    if (data.channel !== currentUser) return;
-                    document.getElementById('guess-screen-play').style.display = 'none';
-                    document.getElementById('guess-screen-finish').style.display = 'block';
-                    document.getElementById('guess-finish-score').textContent = data.score;
-                    document.getElementById('guess-finish-total').textContent = data.total;
-                });
-                socket.on('guess_cancelled', (data) => {
-                    if (data.channel !== currentUser) return;
-                    document.getElementById('guess-screen-setup').style.display = 'block';
-                    document.getElementById('guess-screen-show').style.display = 'none';
-                    document.getElementById('guess-screen-play').style.display = 'none';
-                    document.getElementById('guess-screen-finish').style.display = 'none';
-                });
-                socket.on('guess_error', (msg) => alert('Ошибка: ' + msg));
-
-                const token = localStorage.getItem('domik_bot_token');
-                if (token && currentUser) {
-                    socket.emit('auth', { channel: currentUser, token });
                 }
-            } catch (e) {
-                console.error('Socket error:', e);
             }
-        }
+        });
 
-        function handleChatMessage(data) {}
-
-        // ===== GIVEAWAY =====
-        function startGiveawayCollection() {
-            const keyword = document.getElementById('gv-keyword').value.trim();
-            if (!keyword) { alert('Введите ключевое слово!'); return; }
-            document.getElementById('gv-screen-setup').style.display = 'none';
-            document.getElementById('gv-screen-live').style.display = 'block';
-            document.getElementById('gv-live-keyword').textContent = keyword;
-            if (socket) {
-                socket.emit('start_giveaway', { channel: currentUser, keyword });
+        socket.on('bot_status_changed', (data) => {
+            if (data.channel === currentUser) {
+                updateBotStatusUI(data.active);
             }
-            giveawayActive = true;
-            giveawayWinner = null;
-            totalMessagesChecked = 0;
-            registeredUsers.clear();
-            document.getElementById('gv-users-container').innerHTML = '';
-            document.getElementById('gv-list-counter').textContent = 'Участники (0)';
-            document.getElementById('stat-users').textContent = '0';
-            document.getElementById('stat-messages').textContent = '0';
-            document.getElementById('stat-winners').textContent = '0';
-            document.getElementById('btn-pick-winner').disabled = false;
-            document.getElementById('gv-console').innerHTML = '';
-            addConsoleLog(`🎯 Сбор начат! Ждём "${keyword}".`, 'success');
-        }
+        });
 
-        function pickGiveawayWinner() {
-            if (registeredUsers.size === 0) { alert('Нет участников!'); return; }
-            document.getElementById('btn-pick-winner').disabled = true;
-            const usersArray = Array.from(registeredUsers);
-            giveawayWinner = usersArray[Math.floor(Math.random() * usersArray.length)];
-            document.getElementById('stat-winners').textContent = '1';
-            addConsoleLog(`🎉 ПОБЕДИТЕЛЬ: @${giveawayWinner}!`, 'success');
-            let timeLeft = parseInt(document.getElementById('gv-time').value) || 20;
-            addConsoleLog(`⏳ Ждём сообщение от @${giveawayWinner}... ${timeLeft} сек.`, 'highlight');
-            winnerTimer = setInterval(() => {
-                timeLeft--;
-                if (timeLeft <= 0) {
-                    clearInterval(winnerTimer);
-                    addConsoleLog(`❌ @${giveawayWinner} не ответил вовремя!`, 'highlight');
-                    giveawayWinner = null;
-                    document.getElementById('btn-pick-winner').disabled = false;
-                }
-            }, 1000);
-        }
-
-        function resetGiveaway() {
-            giveawayActive = false;
-            giveawayWinner = null;
-            clearInterval(winnerTimer);
-            if (socket) socket.emit('reset_giveaway', { channel: currentUser });
-            document.getElementById('gv-screen-live').style.display = 'none';
-            document.getElementById('gv-screen-setup').style.display = 'block';
-            document.getElementById('btn-pick-winner').disabled = false;
-        }
-
-        // ===== ЗВУК (фиксированный Windows 10) =====
-        function playNotificationSound() {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
-            const ctx = new AudioContext();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(523.25, ctx.currentTime);
-            gain.gain.setValueAtTime(0.3, ctx.currentTime);
-            osc.start();
-            osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08);
-            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-            osc.stop(ctx.currentTime + 0.3);
-        }
-
-        function addConsoleLog(text, type = '') {
-            const box = document.getElementById('gv-console');
-            const time = new Date().toTimeString().split(' ')[0];
-            let cls = '';
-            if (type === 'success') cls = 'log-success';
-            if (type === 'highlight') cls = 'log-highlight';
-            box.innerHTML += `<div class="log-entry"><span class="log-time">[${time}]</span><span class="${cls}">${escapeHTML(text)}</span></div>`;
-            box.scrollTop = box.scrollHeight;
-        }
-
-        // ===== BOT STATUS =====
-        function onBotToggle(e) {
-            const active = e.target.checked;
-            if (socket) socket.emit('set_bot_status', { channel: currentUser, active });
-        }
-
-        function updateBotStatusUI(active) {
-            const toggle = document.getElementById('bot-toggle');
-            const statusText = document.getElementById('bot-status-text');
-            toggle.checked = active;
-            if (active) {
-                statusText.textContent = 'Включён (бот в чате)';
-                statusText.style.color = 'var(--success)';
-            } else {
-                statusText.textContent = 'Выключен';
-                statusText.style.color = 'var(--text-secondary)';
+        socket.on('battle_update', (data) => {
+            if (data.channel === currentUser) renderBattleState(data.battle);
+        });
+        socket.on('battle_timer', (data) => {
+            if (data.channel === currentUser) {
+                document.getElementById('sb-timer').textContent = '⏰ 00:' + String(data.timeLeft).padStart(2, '0');
             }
-        }
+        });
+        socket.on('battle_error', (err) => alert('Ошибка: ' + err));
 
-        // ===== CONFIG =====
-        async function loadConfig() {
-            try {
-                const res = await fetch(`${BACKEND_URL}/api/config?user=${currentUser}`);
-                localConfig = await res.json();
-            } catch (e) {
-                const saved = localStorage.getItem(`domik_bot_config_${currentUser}`);
-                if (saved) localConfig = JSON.parse(saved);
-            }
-            if (!localConfig.commands) localConfig.commands = {};
-            if (!localConfig.announcements) localConfig.announcements = [];
-            document.getElementById('timer-interval').value = localConfig.interval || 10;
-            renderCommands();
-            renderTimers();
-        }
-
-        async function saveConfig() {
-            localConfig.interval = parseInt(document.getElementById('timer-interval').value) || 10;
-            try {
-                const res = await fetch(`${BACKEND_URL}/api/config?user=${currentUser}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(localConfig)
-                });
-                if (res.ok) alert('✅ Настройки сохранены на сервере!');
-            } catch (e) {
-                localStorage.setItem(`domik_bot_config_${currentUser}`, JSON.stringify(localConfig));
-                alert('💾 Настройки сохранены локально!');
-            }
-        }
-
-        function renderCommands() {
-            const container = document.getElementById('commands-list');
+        socket.on('giveaway_update', (data) => {
+            if (data.channel !== currentUser) return;
+            const container = document.getElementById('gv-users-container');
             container.innerHTML = '';
-            for (const [cmd, resp] of Object.entries(localConfig.commands || {})) {
-                container.innerHTML += `
-                    <div class="item-row">
-                        <div><strong style="color:var(--accent)">${escapeHTML(cmd)}</strong> — ${escapeHTML(resp)}</div>
-                        <button class="btn-danger" onclick="deleteCommand('${cmd}')">Удалить</button>
-                    </div>
-                `;
-            }
-        }
-
-        function addCommand() {
-            const name = document.getElementById('cmd-name').value.trim();
-            const resp = document.getElementById('cmd-response').value.trim();
-            if (!name || !resp) { alert('Заполните оба поля!'); return; }
-            if (!localConfig.commands) localConfig.commands = {};
-            localConfig.commands[name] = resp;
-            document.getElementById('cmd-name').value = '';
-            document.getElementById('cmd-response').value = '';
-            renderCommands();
-        }
-
-        function deleteCommand(cmd) {
-            if (confirm(`Удалить команду "${cmd}"?`)) {
-                delete localConfig.commands[cmd];
-                renderCommands();
-            }
-        }
-
-        function renderTimers() {
-            const container = document.getElementById('timers-list');
-            container.innerHTML = '';
-            (localConfig.announcements || []).forEach((text, index) => {
-                container.innerHTML += `
-                    <div class="item-row">
-                        <div>${escapeHTML(text)}</div>
-                        <button class="btn-danger" onclick="deleteTimer(${index})">Удалить</button>
-                    </div>
-                `;
+            data.users.forEach(user => {
+                container.innerHTML += `<div class="gv-user-badge">${escapeHTML(user)}</div>`;
             });
-        }
+            document.getElementById('stat-users').textContent = data.count;
+            document.getElementById('gv-list-counter').textContent = `Участники (${data.count})`;
+        });
 
-        function addTimer() {
-            const text = document.getElementById('timer-text').value.trim();
-            if (!text) { alert('Введите текст!'); return; }
-            if (!localConfig.announcements) localConfig.announcements = [];
-            localConfig.announcements.push(text);
-            document.getElementById('timer-text').value = '';
-            renderTimers();
-        }
+        socket.on('wheel_state', (data) => {
+            if (data.channel !== currentUser) return;
+            renderWheelState(data.state);
+        });
+        socket.on('wheel_timer', (data) => {
+            if (data.channel !== currentUser) return;
+            document.getElementById('wheel-collect-timer').textContent = data.timeLeft + 'с';
+        });
 
-        function deleteTimer(index) {
-            if (confirm('Удалить уведомление?')) {
-                localConfig.announcements.splice(index, 1);
-                renderTimers();
-            }
-        }
-
-        // ===== NAVIGATION =====
-        function switchTab(tabId, btn) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            if (btn) btn.classList.add('active');
-            const saveBar = document.getElementById('global-save-bar');
-            if (['tab-giveaway','tab-hub','tab-song-battle','tab-main-settings','tab-wheel','tab-guess'].includes(tabId)) {
-                saveBar.style.display = 'none';
-            } else {
-                saveBar.style.display = 'flex';
-            }
-        }
-
-        function switchTabByApp(appName) {
-            const map = {
-                'giveaway': 'tab-giveaway',
-                'songbattle': 'tab-song-battle',
-                'wheel': 'tab-wheel',
-                'guess': 'tab-guess'
-            };
-            const tabId = map[appName];
-            if (tabId) {
-                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.getElementById(tabId).classList.add('active');
-                document.querySelectorAll('.tab-btn').forEach(b => {
-                    if (b.textContent.toLowerCase().includes(appName)) b.classList.add('active');
-                });
-                document.getElementById('global-save-bar').style.display = 'none';
-            }
-        }
-
-        function handleAppClick(appName) {
-            const openInNew = document.getElementById('open-in-new-window').checked;
-            if (openInNew) {
-                const url = window.location.origin + window.location.pathname + '?app=' + appName;
-                window.open(url, '_blank');
-            } else {
-                switchTabByApp(appName);
-            }
-        }
-
-        function openGiveawayApp() {
-            switchTab('tab-giveaway');
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                if (b.textContent.includes('Giveaway')) b.classList.add('active');
-            });
-        }
-
-        function openSongBattle() {
-            switchTab('tab-song-battle');
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                if (b.textContent.includes('Song Battle')) b.classList.add('active');
-            });
-            if (socket) socket.emit('get_battle_state', { channel: currentUser });
-        }
-
-        function openWheelApp() {
-            switchTab('tab-wheel');
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                if (b.textContent.includes('Поле Чудес')) b.classList.add('active');
-            });
-            if (socket) socket.emit('get_wheel_state', { channel: currentUser });
-        }
-
-        function openGuessApp() {
-            switchTab('tab-guess');
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                if (b.textContent.includes('Guess Word')) b.classList.add('active');
-            });
-            if (socket) socket.emit('get_guess_state', { channel: currentUser });
-        }
-
-        // ===== SONG BATTLE =====
-        function startSongCollection() {
-            const theme = document.getElementById('sb-theme').value.trim();
-            const maxSongs = parseInt(document.getElementById('sb-max-songs').value) || 16;
-            const perUser = parseInt(document.getElementById('sb-per-user').value) || 1;
-            if (maxSongs < 4) { alert('Минимум 4 песни'); return; }
-            if (socket) socket.emit('start_collection', { channel: currentUser, theme, maxSongs, perUser });
-            document.getElementById('sb-screen-setup').style.display = 'none';
-            document.getElementById('sb-screen-collect').style.display = 'block';
-            document.getElementById('sb-max-songs-display').textContent = maxSongs;
-            document.getElementById('sb-max-songs-live').textContent = maxSongs;
-            document.getElementById('sb-per-user-live').textContent = perUser;
-            document.getElementById('sb-song-count').textContent = '0';
-            document.getElementById('sb-song-list').innerHTML = '';
-            document.getElementById('sb-start-battle-btn').disabled = true;
-        }
-
-        function stopCollection() {
-            if (socket) socket.emit('stop_collection', { channel: currentUser });
-            document.getElementById('sb-screen-setup').style.display = 'block';
-            document.getElementById('sb-screen-collect').style.display = 'none';
-            document.getElementById('sb-screen-battle').style.display = 'none';
-            document.getElementById('sb-screen-winner').style.display = 'none';
-        }
-
-        function addManualSong() {
-            const url = document.getElementById('sb-manual-url').value.trim();
-            if (!url) return;
-            if (socket) socket.emit('add_song_manual', { channel: currentUser, url });
-            document.getElementById('sb-manual-url').value = '';
-        }
-
-        function startBattle() {
-            const btn = document.getElementById('sb-start-battle-btn');
-            if (btn.disabled) return;
-            if (socket) socket.emit('start_battle', { channel: currentUser });
-        }
-
-        function skipPair() {
-            if (socket) socket.emit('skip_pair', { channel: currentUser });
-        }
-
-        function endBattle() {
-            if (socket) socket.emit('end_battle', { channel: currentUser });
-        }
-
-        function resetBattle() {
-            if (socket) socket.emit('reset_battle', { channel: currentUser });
-            document.getElementById('sb-screen-setup').style.display = 'block';
-            document.getElementById('sb-screen-collect').style.display = 'none';
-            document.getElementById('sb-screen-battle').style.display = 'none';
-            document.getElementById('sb-screen-winner').style.display = 'none';
-        }
-
-        function removeSong(index) {
-            if (socket) socket.emit('remove_song', { channel: currentUser, index });
-        }
-
-        function renderBattleState(battle) {
-            if (!battle) return;
-            switch (battle.stage) {
-                case 'collecting':
-                    document.getElementById('sb-screen-setup').style.display = 'none';
-                    document.getElementById('sb-screen-collect').style.display = 'block';
-                    document.getElementById('sb-screen-battle').style.display = 'none';
-                    document.getElementById('sb-screen-winner').style.display = 'none';
-                    document.getElementById('sb-song-count').textContent = battle.songs.length;
-                    const list = document.getElementById('sb-song-list');
-                    list.innerHTML = '';
-                    battle.songs.forEach((song, i) => {
-                        const div = document.createElement('div');
-                        div.className = 'sb-song-item';
-                        div.innerHTML = `
-                            <div><div class="sb-song-title">${escapeHTML(song.title)}</div><div class="sb-song-author">${escapeHTML(song.addedBy)}</div></div>
-                            <button class="sb-song-remove" onclick="removeSong(${i})">✕</button>
-                        `;
-                        list.appendChild(div);
-                    });
-                    document.getElementById('sb-start-battle-btn').disabled = (battle.songs.length < 4);
-                    break;
-                case 'voting':
-                    document.getElementById('sb-screen-setup').style.display = 'none';
-                    document.getElementById('sb-screen-collect').style.display = 'none';
-                    document.getElementById('sb-screen-battle').style.display = 'block';
-                    document.getElementById('sb-screen-winner').style.display = 'none';
-                    const pair = battle.pairs[battle.currentPairIndex];
-                    if (pair) {
-                        document.getElementById('sb-pair-counter').textContent = `${battle.currentPairIndex+1} / ${battle.pairs.length}`;
-                        document.getElementById('sb-song1-url').textContent = pair.song1.title;
-                        document.getElementById('sb-song1-url').href = pair.song1.url || '#';
-                        document.querySelector('#sb-song1 .sb-song-author').textContent = pair.song1.addedBy;
-                        document.getElementById('sb-votes1').textContent = pair.votes1 || 0;
-                        document.getElementById('sb-song2-url').textContent = pair.song2.title;
-                        document.getElementById('sb-song2-url').href = pair.song2.url || '#';
-                        document.querySelector('#sb-song2 .sb-song-author').textContent = pair.song2.addedBy;
-                        document.getElementById('sb-votes2').textContent = pair.votes2 || 0;
-                    }
-                    break;
-                case 'finished':
-                    document.getElementById('sb-screen-setup').style.display = 'none';
-                    document.getElementById('sb-screen-collect').style.display = 'none';
-                    document.getElementById('sb-screen-battle').style.display = 'none';
-                    document.getElementById('sb-screen-winner').style.display = 'block';
-                    if (battle.winner) {
-                        document.getElementById('sb-winner-song').textContent = battle.winner.title;
-                        document.getElementById('sb-winner-author').textContent = battle.winner.addedBy;
-                    }
-                    break;
-                default:
-                    document.getElementById('sb-screen-setup').style.display = 'block';
-                    document.getElementById('sb-screen-collect').style.display = 'none';
-                    document.getElementById('sb-screen-battle').style.display = 'none';
-                    document.getElementById('sb-screen-winner').style.display = 'none';
-            }
-        }
-
-        // ===== ПОЛЕ ЧУДЕС =====
-        function wheelStartCollecting() {
-            const word = document.getElementById('wheel-word').value.trim();
-            const hint = document.getElementById('wheel-hint').value.trim();
-            const maxAttempts = parseInt(document.getElementById('wheel-max-attempts').value) || 6;
-            const collectTime = parseInt(document.getElementById('wheel-collect-time').value) || 30;
-            if (!word) { alert('Введите слово!'); return; }
-            if (socket) {
-                socket.emit('wheel_start_setup', { channel: currentUser, word, hint, maxAttempts });
-                socket.emit('wheel_start_collecting', { channel: currentUser, duration: collectTime });
-            }
-            document.getElementById('wheel-screen-setup').style.display = 'none';
-            document.getElementById('wheel-screen-collect').style.display = 'block';
-            document.getElementById('wheel-screen-play').style.display = 'none';
-            document.getElementById('wheel-collect-timer').textContent = collectTime + 'с';
-            document.getElementById('wheel-collect-players').innerHTML = '<div>' + currentUser + ' (стример)</div>';
-            document.getElementById('wheel-collect-count').textContent = '1 участников';
-        }
-
-        function wheelForceStart() {
-            if (socket) socket.emit('wheel_force_start', { channel: currentUser });
-        }
-
-        function wheelCancel() {
-            if (socket) socket.emit('wheel_cancel', { channel: currentUser });
-            document.getElementById('wheel-screen-setup').style.display = 'block';
-            document.getElementById('wheel-screen-collect').style.display = 'none';
-            document.getElementById('wheel-screen-play').style.display = 'none';
-        }
-
-        function renderWheelState(state) {
-            if (!state) return;
-            switch (state.stage) {
-                case 'collecting':
-                    document.getElementById('wheel-screen-setup').style.display = 'none';
-                    document.getElementById('wheel-screen-collect').style.display = 'block';
-                    document.getElementById('wheel-screen-play').style.display = 'none';
-                    const players = state.players || [];
-                    const playerList = document.getElementById('wheel-collect-players');
-                    playerList.innerHTML = '';
-                    players.forEach(p => {
-                        const div = document.createElement('div');
-                        div.textContent = p;
-                        playerList.appendChild(div);
-                    });
-                    document.getElementById('wheel-collect-count').textContent = players.length + ' участников';
-                    break;
-                case 'playing':
-                    document.getElementById('wheel-screen-setup').style.display = 'none';
-                    document.getElementById('wheel-screen-collect').style.display = 'none';
-                    document.getElementById('wheel-screen-play').style.display = 'block';
-                    const wordDisplay = document.getElementById('wheel-word-display');
-                    const word = state.word || '';
-                    const guessed = state.guessedLetters || new Set();
-                    let mask = '';
-                    for (let ch of word) {
-                        if (ch === ' ') mask += '  ';
-                        else if (guessed.has(ch.toUpperCase())) mask += ch + ' ';
-                        else mask += '_ ';
-                    }
-                    wordDisplay.textContent = mask.trim();
-                    document.getElementById('wheel-hint-display').textContent = state.hint || '';
-                    const scoreboard = document.getElementById('wheel-scoreboard');
-                    scoreboard.innerHTML = '';
-                    const scores = state.scores || {};
-                    const players2 = state.players || [];
-                    players2.forEach(p => {
-                        const row = document.createElement('div');
-                        row.className = 'wheel-score-row';
-                        row.innerHTML = `<span class="player-name">${escapeHTML(p)}</span><span class="player-score">${scores[p]||0}</span>`;
-                        scoreboard.appendChild(row);
-                    });
-                    const currentIdx = state.currentPlayerIndex || 0;
-                    document.getElementById('wheel-current-player').textContent = '> ' + (players2[currentIdx] || '');
-                    const revealed = state.lettersGuessed ? state.lettersGuessed.length : 0;
-                    const total = state.word ? state.word.replace(/\s/g, '').length : 0;
-                    document.getElementById('wheel-revealed-count').textContent = revealed + '/' + total;
-                    document.getElementById('wheel-attempts-display').textContent = state.wrongAttempts || 0;
-                    document.getElementById('wheel-players-count').textContent = players2.length;
-                    break;
-                default:
-                    document.getElementById('wheel-screen-setup').style.display = 'block';
-                    document.getElementById('wheel-screen-collect').style.display = 'none';
-                    document.getElementById('wheel-screen-play').style.display = 'none';
-            }
-        }
-
-        // ===== GUESS THE WORD =====
-        function guessStartGame() {
-            const category = document.getElementById('guess-category').value;
-            const rounds = parseInt(document.getElementById('guess-rounds').value) || 5;
-            const showTime = parseInt(document.getElementById('guess-show-time').value) || 3;
-            if (socket) socket.emit('guess_start', { channel: currentUser, category, rounds, showTime });
+        socket.on('guess_word_show', (data) => {
+            if (data.channel !== currentUser) return;
             document.getElementById('guess-screen-setup').style.display = 'none';
             document.getElementById('guess-screen-show').style.display = 'block';
             document.getElementById('guess-screen-play').style.display = 'none';
             document.getElementById('guess-screen-finish').style.display = 'none';
-            document.getElementById('guess-show-timer').textContent = '⏰ ' + showTime;
-            document.getElementById('guess-show-round').textContent = '1';
-        }
-
-        function guessAttempt() {
-            const input = document.getElementById('guess-input');
-            const guess = input.value.trim();
-            if (!guess) return;
-            if (socket) socket.emit('guess_attempt', { channel: currentUser, guess });
-            input.value = '';
-        }
-
-        function guessGiveUp() {
-            if (confirm('Сдаться?')) {
-                if (socket) socket.emit('guess_giveup', { channel: currentUser });
+            document.getElementById('guess-show-word').textContent = data.word;
+            document.getElementById('guess-show-round').textContent = data.round;
+            document.getElementById('guess-show-timer').textContent = '⏰ ' + data.time;
+            document.getElementById('guess-play-chat').innerHTML = '';
+            let remaining = data.time;
+            const interval = setInterval(() => {
+                remaining--;
+                document.getElementById('guess-show-timer').textContent = '⏰ ' + remaining;
+                if (remaining <= 0) clearInterval(interval);
+            }, 1000);
+        });
+        socket.on('guess_word_playing', (data) => {
+            if (data.channel !== currentUser) return;
+            document.getElementById('guess-screen-show').style.display = 'none';
+            document.getElementById('guess-screen-play').style.display = 'block';
+            document.getElementById('guess-screen-finish').style.display = 'none';
+            document.getElementById('guess-play-round').textContent = data.round;
+            document.getElementById('guess-play-total').textContent = data.total;
+            document.getElementById('guess-play-score').textContent = data.score;
+            document.getElementById('guess-play-attempts').textContent = data.attempts;
+            document.getElementById('guess-next-btn').style.display = 'none';
+            document.getElementById('guess-input').value = '';
+            document.getElementById('guess-input').disabled = false;
+            document.getElementById('guess-input').focus();
+        });
+        socket.on('guess_correct', (data) => {
+            if (data.channel !== currentUser) return;
+            document.getElementById('guess-play-score').textContent = data.score;
+            document.getElementById('guess-next-btn').style.display = 'inline-block';
+            document.getElementById('guess-input').disabled = true;
+            document.getElementById('guess-play-system').innerHTML = '✅ Правильно! Слово: ' + data.word;
+        });
+        socket.on('guess_wrong', (data) => {
+            if (data.channel !== currentUser) return;
+            document.getElementById('guess-play-attempts').textContent = data.attempts;
+            if (data.attempts >= data.maxAttempts) {
+                document.getElementById('guess-play-system').innerHTML = '❌ Попыток больше нет! Слово будет показано.';
                 document.getElementById('guess-input').disabled = true;
-                document.getElementById('guess-play-system').innerHTML = '⏳ Переход к следующему слову...';
+                setTimeout(() => {
+                    document.getElementById('guess-next-btn').style.display = 'inline-block';
+                }, 1500);
+            } else {
+                document.getElementById('guess-play-system').innerHTML = '❌ Неправильно! Попробуйте ещё.';
             }
-        }
-
-        function guessNext() {
-            if (socket) socket.emit('guess_next', { channel: currentUser });
-        }
-
-        function guessCancel() {
-            if (socket) socket.emit('guess_cancel', { channel: currentUser });
+            document.getElementById('guess-input').value = '';
+            document.getElementById('guess-input').focus();
+        });
+        socket.on('guess_finished', (data) => {
+            if (data.channel !== currentUser) return;
+            document.getElementById('guess-screen-play').style.display = 'none';
+            document.getElementById('guess-screen-finish').style.display = 'block';
+            document.getElementById('guess-finish-score').textContent = data.score;
+            document.getElementById('guess-finish-total').textContent = data.total;
+        });
+        socket.on('guess_cancelled', (data) => {
+            if (data.channel !== currentUser) return;
             document.getElementById('guess-screen-setup').style.display = 'block';
             document.getElementById('guess-screen-show').style.display = 'none';
             document.getElementById('guess-screen-play').style.display = 'none';
             document.getElementById('guess-screen-finish').style.display = 'none';
-        }
+        });
+        socket.on('guess_error', (msg) => alert('Ошибка: ' + msg));
 
-        // ===== UTILITY =====
-        function escapeHTML(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
+        const token = localStorage.getItem('domik_bot_token');
+        if (token && currentUser) {
+            socket.emit('auth', { channel: currentUser, token });
+            socket.emit('set_bot_status', { channel: currentUser, active: true });
         }
+    } catch (e) {
+        console.error('Socket error:', e);
+    }
+}
 
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('collapsed');
+function handleChatMessage(data) {}
+
+// ===== GIVEAWAY =====
+function startGiveawayCollection() {
+    const keyword = document.getElementById('gv-keyword').value.trim();
+    if (!keyword) { alert('Введите ключевое слово!'); return; }
+    document.getElementById('gv-screen-setup').style.display = 'none';
+    document.getElementById('gv-screen-live').style.display = 'block';
+    document.getElementById('gv-live-keyword').textContent = keyword;
+    if (socket) {
+        socket.emit('start_giveaway', { channel: currentUser, keyword });
+    }
+    giveawayActive = true;
+    giveawayWinner = null;
+    totalMessagesChecked = 0;
+    registeredUsers.clear();
+    document.getElementById('gv-users-container').innerHTML = '';
+    document.getElementById('gv-list-counter').textContent = 'Участники (0)';
+    document.getElementById('stat-users').textContent = '0';
+    document.getElementById('stat-messages').textContent = '0';
+    document.getElementById('stat-winners').textContent = '0';
+    document.getElementById('btn-pick-winner').disabled = false;
+    document.getElementById('gv-console').innerHTML = '';
+    addConsoleLog(`🎯 Сбор начат! Ждём "${keyword}".`, 'success');
+}
+
+function pickGiveawayWinner() {
+    if (registeredUsers.size === 0) { alert('Нет участников!'); return; }
+    document.getElementById('btn-pick-winner').disabled = true;
+    const usersArray = Array.from(registeredUsers);
+    giveawayWinner = usersArray[Math.floor(Math.random() * usersArray.length)];
+    document.getElementById('stat-winners').textContent = '1';
+    addConsoleLog(`🎉 ПОБЕДИТЕЛЬ: @${giveawayWinner}!`, 'success');
+    let timeLeft = parseInt(document.getElementById('gv-time').value) || 20;
+    addConsoleLog(`⏳ Ждём сообщение от @${giveawayWinner}... ${timeLeft} сек.`, 'highlight');
+    winnerTimer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+            clearInterval(winnerTimer);
+            addConsoleLog(`❌ @${giveawayWinner} не ответил вовремя!`, 'highlight');
+            giveawayWinner = null;
+            document.getElementById('btn-pick-winner').disabled = false;
         }
+    }, 1000);
+}
 
-        function openDonate() {
-            window.open(DONATE_URL, '_blank');
-        }
+function resetGiveaway() {
+    giveawayActive = false;
+    giveawayWinner = null;
+    clearInterval(winnerTimer);
+    if (socket) socket.emit('reset_giveaway', { channel: currentUser });
+    document.getElementById('gv-screen-live').style.display = 'none';
+    document.getElementById('gv-screen-setup').style.display = 'block';
+    document.getElementById('btn-pick-winner').disabled = false;
+}
 
-        // ===== ГЛОБАЛЬНЫЕ ФУНКЦИИ =====
-        window.loginWithTwitch = loginWithTwitch;
-        window.logout = logout;
-        window.switchTab = switchTab;
-        window.openGiveawayApp = openGiveawayApp;
-        window.openSongBattle = openSongBattle;
-        window.openWheelApp = openWheelApp;
-        window.openGuessApp = openGuessApp;
-        window.addCommand = addCommand;
-        window.deleteCommand = deleteCommand;
-        window.addTimer = addTimer;
-        window.deleteTimer = deleteTimer;
-        window.saveConfig = saveConfig;
-        window.startGiveawayCollection = startGiveawayCollection;
-        window.pickGiveawayWinner = pickGiveawayWinner;
-        window.resetGiveaway = resetGiveaway;
-        window.startSongCollection = startSongCollection;
-        window.stopCollection = stopCollection;
-        window.addManualSong = addManualSong;
-        window.startBattle = startBattle;
-        window.skipPair = skipPair;
-        window.endBattle = endBattle;
-        window.resetBattle = resetBattle;
-        window.removeSong = removeSong;
-        window.wheelStartCollecting = wheelStartCollecting;
-        window.wheelForceStart = wheelForceStart;
-        window.wheelCancel = wheelCancel;
-        window.guessStartGame = guessStartGame;
-        window.guessAttempt = guessAttempt;
-        window.guessGiveUp = guessGiveUp;
-        window.guessNext = guessNext;
-        window.guessCancel = guessCancel;
-        window.toggleSidebar = toggleSidebar;
-        window.openDonate = openDonate;
-        window.handleAppClick = handleAppClick;
-        window.switchTabByApp = switchTabByApp;
-    </script>
+// ===== ЗВУК (фиксированный Windows 10) =====
+function playNotificationSound() {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    osc.start();
+    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    osc.stop(ctx.currentTime + 0.3);
+}
+
+function addConsoleLog(text, type = '') {
+    const box = document.getElementById('gv-console');
+    const time = new Date().toTimeString().split(' ')[0];
+    let cls = '';
+    if (type === 'success') cls = 'log-success';
+    if (type === 'highlight') cls = 'log-highlight';
+    box.innerHTML += `<div class="log-entry"><span class="log-time">[${time}]</span><span class="${cls}">${escapeHTML(text)}</span></div>`;
+    box.scrollTop = box.scrollHeight;
+}
+
+// ===== BOT STATUS (обновление UI) =====
+function updateBotStatusUI(active) {
+    const statusText = document.getElementById('bot-status-text');
+    if (active) {
+        statusText.textContent = 'Включён (бот в чате)';
+        statusText.style.color = 'var(--success)';
+    } else {
+        statusText.textContent = 'Выключен';
+        statusText.style.color = 'var(--text-secondary)';
+    }
+}
+
+// ===== CONFIG =====
+async function loadConfig() {
+    try {
+        const res = await fetch(`${BACKEND_URL}/api/config?user=${currentUser}`);
+        localConfig = await res.json();
+    } catch (e) {
+        const saved = localStorage.getItem(`domik_bot_config_${currentUser}`);
+        if (saved) localConfig = JSON.parse(saved);
+    }
+    if (!localConfig.commands) localConfig.commands = {};
+    if (!localConfig.announcements) localConfig.announcements = [];
+    document.getElementById('timer-interval').value = localConfig.interval || 10;
+    renderCommands();
+    renderTimers();
+}
+
+async function saveConfig() {
+    localConfig.interval = parseInt(document.getElementById('timer-interval').value) || 10;
+    try {
+        const res = await fetch(`${BACKEND_URL}/api/config?user=${currentUser}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(localConfig)
+        });
+        if (res.ok) alert('✅ Настройки сохранены на сервере!');
+    } catch (e) {
+        localStorage.setItem(`domik_bot_config_${currentUser}`, JSON.stringify(localConfig));
+        alert('💾 Настройки сохранены локально!');
+    }
+}
+
+function renderCommands() {
+    const container = document.getElementById('commands-list');
+    container.innerHTML = '';
+    for (const [cmd, resp] of Object.entries(localConfig.commands || {})) {
+        container.innerHTML += `
+            <div class="item-row">
+                <div><strong style="color:var(--accent)">${escapeHTML(cmd)}</strong> — ${escapeHTML(resp)}</div>
+                <button class="btn-danger" onclick="deleteCommand('${cmd}')">Удалить</button>
+            </div>
+        `;
+    }
+}
+
+function addCommand() {
+    const name = document.getElementById('cmd-name').value.trim();
+    const resp = document.getElementById('cmd-response').value.trim();
+    if (!name || !resp) { alert('Заполните оба поля!'); return; }
+    if (!localConfig.commands) localConfig.commands = {};
+    localConfig.commands[name] = resp;
+    document.getElementById('cmd-name').value = '';
+    document.getElementById('cmd-response').value = '';
+    renderCommands();
+}
+
+function deleteCommand(cmd) {
+    if (confirm(`Удалить команду "${cmd}"?`)) {
+        delete localConfig.commands[cmd];
+        renderCommands();
+    }
+}
+
+function renderTimers() {
+    const container = document.getElementById('timers-list');
+    container.innerHTML = '';
+    (localConfig.announcements || []).forEach((text, index) => {
+        container.innerHTML += `
+            <div class="item-row">
+                <div>${escapeHTML(text)}</div>
+                <button class="btn-danger" onclick="deleteTimer(${index})">Удалить</button>
+            </div>
+        `;
+    });
+}
+
+function addTimer() {
+    const text = document.getElementById('timer-text').value.trim();
+    if (!text) { alert('Введите текст!'); return; }
+    if (!localConfig.announcements) localConfig.announcements = [];
+    localConfig.announcements.push(text);
+    document.getElementById('timer-text').value = '';
+    renderTimers();
+}
+
+function deleteTimer(index) {
+    if (confirm('Удалить уведомление?')) {
+        localConfig.announcements.splice(index, 1);
+        renderTimers();
+    }
+}
+
+// ===== NAVIGATION =====
+function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    if (btn) btn.classList.add('active');
+    const saveBar = document.getElementById('global-save-bar');
+    if (['tab-giveaway','tab-hub','tab-song-battle','tab-main-settings','tab-wheel','tab-guess'].includes(tabId)) {
+        saveBar.style.display = 'none';
+    } else {
+        saveBar.style.display = 'flex';
+    }
+}
+
+function switchTabByApp(appName) {
+    const map = {
+        'giveaway': 'tab-giveaway',
+        'songbattle': 'tab-song-battle',
+        'wheel': 'tab-wheel',
+        'guess': 'tab-guess'
+    };
+    const tabId = map[appName];
+    if (tabId) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            if (b.textContent.toLowerCase().includes(appName)) b.classList.add('active');
+        });
+        document.getElementById('global-save-bar').style.display = 'none';
+    }
+}
+
+function handleAppClick(appName) {
+    const openInNew = document.getElementById('open-in-new-window').checked;
+    if (openInNew) {
+        const url = window.location.origin + window.location.pathname + '?app=' + appName;
+        window.open(url, '_blank');
+    } else {
+        switchTabByApp(appName);
+    }
+}
+
+function openGiveawayApp() {
+    switchTab('tab-giveaway');
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        if (b.textContent.includes('Giveaway')) b.classList.add('active');
+    });
+}
+
+function openSongBattle() {
+    switchTab('tab-song-battle');
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        if (b.textContent.includes('Song Battle')) b.classList.add('active');
+    });
+    if (socket) socket.emit('get_battle_state', { channel: currentUser });
+}
+
+function openWheelApp() {
+    switchTab('tab-wheel');
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        if (b.textContent.includes('Поле Чудес')) b.classList.add('active');
+    });
+    if (socket) socket.emit('get_wheel_state', { channel: currentUser });
+}
+
+function openGuessApp() {
+    switchTab('tab-guess');
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        if (b.textContent.includes('Guess Word')) b.classList.add('active');
+    });
+    if (socket) socket.emit('get_guess_state', { channel: currentUser });
+}
+
+// ===== SONG BATTLE =====
+function startSongCollection() {
+    const theme = document.getElementById('sb-theme').value.trim();
+    const maxSongs = parseInt(document.getElementById('sb-max-songs').value) || 16;
+    const perUser = parseInt(document.getElementById('sb-per-user').value) || 1;
+    if (maxSongs < 4) { alert('Минимум 4 песни'); return; }
+    if (socket) socket.emit('start_collection', { channel: currentUser, theme, maxSongs, perUser });
+    document.getElementById('sb-screen-setup').style.display = 'none';
+    document.getElementById('sb-screen-collect').style.display = 'block';
+    document.getElementById('sb-max-songs-display').textContent = maxSongs;
+    document.getElementById('sb-max-songs-live').textContent = maxSongs;
+    document.getElementById('sb-per-user-live').textContent = perUser;
+    document.getElementById('sb-song-count').textContent = '0';
+    document.getElementById('sb-song-list').innerHTML = '';
+    document.getElementById('sb-start-battle-btn').disabled = true;
+}
+
+function stopCollection() {
+    if (socket) socket.emit('stop_collection', { channel: currentUser });
+    document.getElementById('sb-screen-setup').style.display = 'block';
+    document.getElementById('sb-screen-collect').style.display = 'none';
+    document.getElementById('sb-screen-battle').style.display = 'none';
+    document.getElementById('sb-screen-winner').style.display = 'none';
+}
+
+function addManualSong() {
+    const url = document.getElementById('sb-manual-url').value.trim();
+    if (!url) return;
+    if (socket) socket.emit('add_song_manual', { channel: currentUser, url });
+    document.getElementById('sb-manual-url').value = '';
+}
+
+function startBattle() {
+    const btn = document.getElementById('sb-start-battle-btn');
+    if (btn.disabled) return;
+    if (socket) socket.emit('start_battle', { channel: currentUser });
+}
+
+function skipPair() {
+    if (socket) socket.emit('skip_pair', { channel: currentUser });
+}
+
+function endBattle() {
+    if (socket) socket.emit('end_battle', { channel: currentUser });
+}
+
+function resetBattle() {
+    if (socket) socket.emit('reset_battle', { channel: currentUser });
+    document.getElementById('sb-screen-setup').style.display = 'block';
+    document.getElementById('sb-screen-collect').style.display = 'none';
+    document.getElementById('sb-screen-battle').style.display = 'none';
+    document.getElementById('sb-screen-winner').style.display = 'none';
+}
+
+function removeSong(index) {
+    if (socket) socket.emit('remove_song', { channel: currentUser, index });
+}
+
+function renderBattleState(battle) {
+    if (!battle) return;
+    switch (battle.stage) {
+        case 'collecting':
+            document.getElementById('sb-screen-setup').style.display = 'none';
+            document.getElementById('sb-screen-collect').style.display = 'block';
+            document.getElementById('sb-screen-battle').style.display = 'none';
+            document.getElementById('sb-screen-winner').style.display = 'none';
+            document.getElementById('sb-song-count').textContent = battle.songs.length;
+            const list = document.getElementById('sb-song-list');
+            list.innerHTML = '';
+            battle.songs.forEach((song, i) => {
+                const div = document.createElement('div');
+                div.className = 'sb-song-item';
+                div.innerHTML = `
+                    <div><div class="sb-song-title">${escapeHTML(song.title)}</div><div class="sb-song-author">${escapeHTML(song.addedBy)}</div></div>
+                    <button class="sb-song-remove" onclick="removeSong(${i})">✕</button>
+                `;
+                list.appendChild(div);
+            });
+            document.getElementById('sb-start-battle-btn').disabled = (battle.songs.length < 4);
+            break;
+        case 'voting':
+            document.getElementById('sb-screen-setup').style.display = 'none';
+            document.getElementById('sb-screen-collect').style.display = 'none';
+            document.getElementById('sb-screen-battle').style.display = 'block';
+            document.getElementById('sb-screen-winner').style.display = 'none';
+            const pair = battle.pairs[battle.currentPairIndex];
+            if (pair) {
+                document.getElementById('sb-pair-counter').textContent = `${battle.currentPairIndex+1} / ${battle.pairs.length}`;
+                document.getElementById('sb-song1-url').textContent = pair.song1.title;
+                document.getElementById('sb-song1-url').href = pair.song1.url || '#';
+                document.querySelector('#sb-song1 .sb-song-author').textContent = pair.song1.addedBy;
+                document.getElementById('sb-votes1').textContent = pair.votes1 || 0;
+                document.getElementById('sb-song2-url').textContent = pair.song2.title;
+                document.getElementById('sb-song2-url').href = pair.song2.url || '#';
+                document.querySelector('#sb-song2 .sb-song-author').textContent = pair.song2.addedBy;
+                document.getElementById('sb-votes2').textContent = pair.votes2 || 0;
+                // Плееры
+                document.getElementById('sb-iframe1').src = getYouTubeEmbedUrl(pair.song1.url);
+                document.getElementById('sb-iframe2').src = getYouTubeEmbedUrl(pair.song2.url);
+            }
+            break;
+        case 'finished':
+            document.getElementById('sb-screen-setup').style.display = 'none';
+            document.getElementById('sb-screen-collect').style.display = 'none';
+            document.getElementById('sb-screen-battle').style.display = 'none';
+            document.getElementById('sb-screen-winner').style.display = 'block';
+            if (battle.winner) {
+                document.getElementById('sb-winner-song').textContent = battle.winner.title;
+                document.getElementById('sb-winner-author').textContent = battle.winner.addedBy;
+            }
+            break;
+        default:
+            document.getElementById('sb-screen-setup').style.display = 'block';
+            document.getElementById('sb-screen-collect').style.display = 'none';
+            document.getElementById('sb-screen-battle').style.display = 'none';
+            document.getElementById('sb-screen-winner').style.display = 'none';
+    }
+}
+
+function getYouTubeEmbedUrl(url) {
+    if (!url) return '';
+    const match1 = url.match(/[?&]v=([^&]+)/);
+    if (match1) return `https://www.youtube.com/embed/${match1[1]}`;
+    const match2 = url.match(/youtu\.be\/([^?]+)/);
+    if (match2) return `https://www.youtube.com/embed/${match2[1]}`;
+    return '';
+}
+
+// ===== ПОЛЕ ЧУДЕС =====
+function wheelStartCollecting() {
+    const word = document.getElementById('wheel-word').value.trim();
+    const hint = document.getElementById('wheel-hint').value.trim();
+    const maxAttempts = parseInt(document.getElementById('wheel-max-attempts').value) || 6;
+    const collectTime = parseInt(document.getElementById('wheel-collect-time').value) || 30;
+    if (!word) { alert('Введите слово!'); return; }
+    if (socket) {
+        socket.emit('wheel_start_setup', { channel: currentUser, word, hint, maxAttempts });
+        socket.emit('wheel_start_collecting', { channel: currentUser, duration: collectTime });
+    }
+    document.getElementById('wheel-screen-setup').style.display = 'none';
+    document.getElementById('wheel-screen-collect').style.display = 'block';
+    document.getElementById('wheel-screen-play').style.display = 'none';
+    document.getElementById('wheel-collect-timer').textContent = collectTime + 'с';
+    document.getElementById('wheel-collect-players').innerHTML = '<div>' + currentUser + ' (стример)</div>';
+    document.getElementById('wheel-collect-count').textContent = '1 участников';
+}
+
+function wheelForceStart() {
+    if (socket) socket.emit('wheel_force_start', { channel: currentUser });
+}
+
+function wheelCancel() {
+    if (socket) socket.emit('wheel_cancel', { channel: currentUser });
+    document.getElementById('wheel-screen-setup').style.display = 'block';
+    document.getElementById('wheel-screen-collect').style.display = 'none';
+    document.getElementById('wheel-screen-play').style.display = 'none';
+}
+
+function renderWheelState(state) {
+    if (!state) return;
+    switch (state.stage) {
+        case 'collecting':
+            document.getElementById('wheel-screen-setup').style.display = 'none';
+            document.getElementById('wheel-screen-collect').style.display = 'block';
+            document.getElementById('wheel-screen-play').style.display = 'none';
+            const players = state.players || [];
+            const playerList = document.getElementById('wheel-collect-players');
+            playerList.innerHTML = '';
+            players.forEach(p => {
+                const div = document.createElement('div');
+                div.textContent = p;
+                playerList.appendChild(div);
+            });
+            document.getElementById('wheel-collect-count').textContent = players.length + ' участников';
+            break;
+        case 'playing':
+            document.getElementById('wheel-screen-setup').style.display = 'none';
+            document.getElementById('wheel-screen-collect').style.display = 'none';
+            document.getElementById('wheel-screen-play').style.display = 'block';
+            const wordDisplay = document.getElementById('wheel-word-display');
+            const word = state.word || '';
+            const guessed = state.guessedLetters || new Set();
+            let mask = '';
+            for (let ch of word) {
+                if (ch === ' ') mask += '  ';
+                else if (guessed.has(ch.toUpperCase())) mask += ch + ' ';
+                else mask += '_ ';
+            }
+            wordDisplay.textContent = mask.trim();
+            document.getElementById('wheel-hint-display').textContent = state.hint || '';
+            const scoreboard = document.getElementById('wheel-scoreboard');
+            scoreboard.innerHTML = '';
+            const scores = state.scores || {};
+            const players2 = state.players || [];
+            players2.forEach(p => {
+                const row = document.createElement('div');
+                row.className = 'wheel-score-row';
+                row.innerHTML = `<span class="player-name">${escapeHTML(p)}</span><span class="player-score">${scores[p]||0}</span>`;
+                scoreboard.appendChild(row);
+            });
+            const currentIdx = state.currentPlayerIndex || 0;
+            document.getElementById('wheel-current-player').textContent = '> ' + (players2[currentIdx] || '');
+            const revealed = state.lettersGuessed ? state.lettersGuessed.length : 0;
+            const total = state.word ? state.word.replace(/\s/g, '').length : 0;
+            document.getElementById('wheel-revealed-count').textContent = revealed + '/' + total;
+            document.getElementById('wheel-attempts-display').textContent = state.wrongAttempts || 0;
+            document.getElementById('wheel-players-count').textContent = players2.length;
+            break;
+        default:
+            document.getElementById('wheel-screen-setup').style.display = 'block';
+            document.getElementById('wheel-screen-collect').style.display = 'none';
+            document.getElementById('wheel-screen-play').style.display = 'none';
+    }
+}
+
+// ===== GUESS THE WORD =====
+function guessStartGame() {
+    const category = document.getElementById('guess-category').value;
+    const rounds = parseInt(document.getElementById('guess-rounds').value) || 5;
+    const showTime = parseInt(document.getElementById('guess-show-time').value) || 3;
+    if (socket) socket.emit('guess_start', { channel: currentUser, category, rounds, showTime });
+    document.getElementById('guess-screen-setup').style.display = 'none';
+    document.getElementById('guess-screen-show').style.display = 'block';
+    document.getElementById('guess-screen-play').style.display = 'none';
+    document.getElementById('guess-screen-finish').style.display = 'none';
+    document.getElementById('guess-show-timer').textContent = '⏰ ' + showTime;
+    document.getElementById('guess-show-round').textContent = '1';
+}
+
+function guessAttempt() {
+    const input = document.getElementById('guess-input');
+    const guess = input.value.trim();
+    if (!guess) return;
+    if (socket) socket.emit('guess_attempt', { channel: currentUser, guess });
+    input.value = '';
+}
+
+function guessGiveUp() {
+    if (confirm('Сдаться?')) {
+        if (socket) socket.emit('guess_giveup', { channel: currentUser });
+        document.getElementById('guess-input').disabled = true;
+        document.getElementById('guess-play-system').innerHTML = '⏳ Переход к следующему слову...';
+    }
+}
+
+function guessNext() {
+    if (socket) socket.emit('guess_next', { channel: currentUser });
+}
+
+function guessCancel() {
+    if (socket) socket.emit('guess_cancel', { channel: currentUser });
+    document.getElementById('guess-screen-setup').style.display = 'block';
+    document.getElementById('guess-screen-show').style.display = 'none';
+    document.getElementById('guess-screen-play').style.display = 'none';
+    document.getElementById('guess-screen-finish').style.display = 'none';
+}
+
+// ===== UTILITY =====
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+function openDonate() {
+    window.open(DONATE_URL, '_blank');
+}
+
+// ===== ГЛОБАЛЬНЫЕ ФУНКЦИИ =====
+window.loginWithTwitch = loginWithTwitch;
+window.logout = logout;
+window.switchTab = switchTab;
+window.openGiveawayApp = openGiveawayApp;
+window.openSongBattle = openSongBattle;
+window.openWheelApp = openWheelApp;
+window.openGuessApp = openGuessApp;
+window.addCommand = addCommand;
+window.deleteCommand = deleteCommand;
+window.addTimer = addTimer;
+window.deleteTimer = deleteTimer;
+window.saveConfig = saveConfig;
+window.startGiveawayCollection = startGiveawayCollection;
+window.pickGiveawayWinner = pickGiveawayWinner;
+window.resetGiveaway = resetGiveaway;
+window.startSongCollection = startSongCollection;
+window.stopCollection = stopCollection;
+window.addManualSong = addManualSong;
+window.startBattle = startBattle;
+window.skipPair = skipPair;
+window.endBattle = endBattle;
+window.resetBattle = resetBattle;
+window.removeSong = removeSong;
+window.wheelStartCollecting = wheelStartCollecting;
+window.wheelForceStart = wheelForceStart;
+window.wheelCancel = wheelCancel;
+window.guessStartGame = guessStartGame;
+window.guessAttempt = guessAttempt;
+window.guessGiveUp = guessGiveUp;
+window.guessNext = guessNext;
+window.guessCancel = guessCancel;
+window.toggleSidebar = toggleSidebar;
+window.openDonate = openDonate;
+window.handleAppClick = handleAppClick;
+window.switchTabByApp = switchTabByApp;
+</script>
 </body>
 </html>
