@@ -5,6 +5,7 @@ const socketIo = require('socket.io');
 const tmi = require('tmi.js');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 
 const PORT = process.env.PORT || 3000;
 const BOT_USERNAME = process.env.BOT_USERNAME;
@@ -21,11 +22,21 @@ console.log(`🤖 Бот ${BOT_USERNAME} запускается...`);
 const app = express();
 app.set('trust proxy', 1);
 app.use(helmet());
+
+// === РАЗРЕШАЕМ CORS ДЛЯ GITHUB PAGES И RAILWAY ===
 app.use(cors({
-    origin: ['https://DomikXDX.github.io', 'https://domikxdx.github.io', 'http://localhost:3000'],
+    origin: [
+        'https://domikxdx.github.io',
+        'https://domikbot-12-production.up.railway.app',
+        'http://localhost:3000'
+    ],
     credentials: true
 }));
+
 app.use(express.json({ limit: '1mb' }));
+
+// === РАЗДАЁМ СТАТИКУ (HTML, CSS, JS) ===
+app.use(express.static(__dirname));
 
 // === Rate Limiting для API ===
 const apiLimiter = rateLimit({
@@ -37,6 +48,7 @@ const apiLimiter = rateLimit({
 });
 app.use('/api', apiLimiter);
 
+// === Health check ===
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', bot: BOT_USERNAME });
 });
@@ -44,12 +56,17 @@ app.get('/health', (req, res) => {
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: ['https://DomikXDX.github.io', 'https://domikxdx.github.io', 'http://localhost:3000'],
+        origin: [
+            'https://domikxdx.github.io',
+            'https://domikbot-12-production.up.railway.app',
+            'http://localhost:3000'
+        ],
         methods: ['GET', 'POST']
     },
     transports: ['websocket', 'polling']
 });
 
+// === Хранилища ===
 const clients = {};
 const botStatus = {};
 const ipConnections = {};
@@ -194,4 +211,5 @@ server.listen(PORT, () => {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
     console.log(`🤖 Бот ${BOT_USERNAME} готов к подключению`);
     console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+    console.log(`🌐 Сайт доступен по адресу: http://localhost:${PORT}/`);
 });
