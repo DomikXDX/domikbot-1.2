@@ -23,7 +23,7 @@ const app = express();
 app.set('trust proxy', 1);
 app.use(helmet());
 
-// === РАЗРЕШАЕМ CORS ДЛЯ GITHUB PAGES И RAILWAY ===
+// === РАЗРЕШАЕМ CORS ===
 app.use(cors({
     origin: [
         'https://domikxdx.github.io',
@@ -37,6 +37,11 @@ app.use(express.json({ limit: '1mb' }));
 
 // === РАЗДАЁМ СТАТИКУ (HTML, CSS, JS) ===
 app.use(express.static(__dirname));
+
+// === ЯВНЫЙ РОУТ ДЛЯ КОРНЯ ===
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // === Rate Limiting для API ===
 const apiLimiter = rateLimit({
@@ -72,6 +77,7 @@ const botStatus = {};
 const ipConnections = {};
 const userCooldowns = {};
 
+// === Подключение бота ===
 function connectBot(channel) {
     console.log(`🔌 connectBot вызван для канала ${channel}`);
     const entry = clients[channel];
@@ -102,6 +108,7 @@ function connectBot(channel) {
         });
 }
 
+// === WebSocket ===
 io.on('connection', (socket) => {
     const ip = socket.handshake.address;
 
@@ -207,6 +214,7 @@ io.on('connection', (socket) => {
     });
 });
 
+// === Запуск сервера ===
 server.listen(PORT, () => {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
     console.log(`🤖 Бот ${BOT_USERNAME} готов к подключению`);
