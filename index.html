@@ -7,8 +7,394 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <style>
-/* ===== Все стили (уже даны ранее, я их не дублирую, чтобы не растягивать ответ) ===== */
-/* ... (возьмите стили из предыдущего сообщения) ... */
+:root {
+    --bg-primary: #09090b;
+    --bg-secondary: #0c0c0e;
+    --bg-glass: rgba(24,24,27,0.6);
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --border-glass: rgba(255,255,255,0.08);
+    --accent: #9146FF;
+    --accent-glow: rgba(145,70,255,0.25);
+    --giveaway: #f5a623;
+    --danger: #ef4444;
+    --success: #22c55e;
+    --shadow: 0 8px 24px rgba(0,0,0,0.4);
+    --radius: 12px;
+    --radius-lg: 20px;
+    --transition: all 0.3s ease;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+#login-page {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    background: var(--bg-primary);
+}
+#login-page .container { display: flex; height: 100%; }
+.login-hero {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 60px;
+    background: radial-gradient(circle at 0% 50%, rgba(145,70,255,0.12), transparent 50%);
+    border-right: 1px solid var(--border-glass);
+}
+.login-hero h1 {
+    font-size: 3.8rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -2px;
+    background: linear-gradient(to right, #fff, #a1a1aa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.login-hero h1 span { color: var(--accent); -webkit-text-fill-color: initial; }
+.login-hero p {
+    font-size: 1.4rem;
+    color: var(--text-secondary);
+    margin-top: 15px;
+    max-width: 600px;
+}
+.login-form {
+    flex: 0.8;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-secondary);
+    padding: 40px;
+    min-height: 100%;
+}
+.login-card {
+    width: 100%;
+    max-width: 440px;
+    padding: 50px 40px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.login-card h3 { font-size: 2rem; font-weight: 700; margin-bottom: 12px; }
+.login-card p { color: var(--text-secondary); font-size: 1rem; margin-bottom: 35px; line-height: 1.5; }
+.btn-twitch {
+    width: 100%;
+    background: #9146FF;
+    color: white;
+    border: none;
+    padding: 18px 24px;
+    border-radius: 14px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 30px rgba(145,70,255,0.35);
+}
+.btn-twitch:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 40px rgba(145,70,255,0.5); }
+.btn-twitch:active { transform: scale(0.98); }
+#main-dashboard { display: none; width: 100vw; height: 100vh; }
+.sidebar {
+    width: 280px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid var(--border-glass);
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    transition: width 0.3s ease;
+    position: relative;
+}
+.sidebar.collapsed {
+    width: 70px;
+    padding: 20px 10px;
+}
+.sidebar.collapsed .sidebar-logo,
+.sidebar.collapsed .user-info,
+.sidebar.collapsed .sidebar-category,
+.sidebar.collapsed .tab-btn span:last-child { display: none; }
+.sidebar.collapsed .tab-btn { justify-content: center; padding: 12px; font-size: 1.2rem; }
+.sidebar-toggle {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-glass);
+    border: 1px solid var(--border-glass);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+.sidebar-toggle:hover { background: var(--accent); color: #fff; }
+.sidebar-logo { text-align: center; font-weight: 800; letter-spacing: -1px; margin-bottom: 20px; }
+.sidebar-logo span { color: var(--accent); }
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.03);
+    padding: 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-glass);
+    margin-bottom: 20px;
+}
+.user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #27272a; object-fit: cover; }
+.user-info { display: flex; flex-direction: column; overflow: hidden; }
+.user-name { font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-status { font-size: 0.75rem; color: var(--text-secondary); }
+.sidebar-category {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    margin-top: 15px;
+    margin-bottom: 8px;
+    padding-left: 10px;
+    font-weight: 600;
+}
+.tab-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.tab-btn:hover { background: rgba(255,255,255,0.03); color: var(--text-primary); }
+.tab-btn.active {
+    background: rgba(145,70,255,0.15);
+    border: 1px solid rgba(145,70,255,0.3);
+    color: #fff;
+}
+.tab-btn.logout {
+    margin-top: auto;
+    background: rgba(239,68,68,0.1);
+    color: var(--danger);
+    border: 1px solid rgba(239,68,68,0.2);
+}
+.tab-btn.logout:hover { background: var(--danger); color: white; }
+.content {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+.tab-content { display: none; flex: 1; }
+.tab-content.active { display: flex; flex-direction: column; }
+.tab-content h1 { font-weight: 800; margin: 0 0 25px 0; font-size: 1.8rem; }
+.form-group { margin-bottom: 25px; display: flex; gap: 15px; }
+input, select {
+    background: #18181b;
+    border: 1px solid var(--border-glass);
+    color: var(--text-primary);
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    outline: none;
+    flex: 1;
+    font-family: inherit;
+    transition: var(--transition);
+}
+input:focus, select:focus { border-color: var(--accent); }
+.btn-primary {
+    background: linear-gradient(135deg, #9146FF, #7c3aed);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(145,70,255,0.3);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(145,70,255,0.4); }
+.btn-danger {
+    background: var(--danger);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.btn-danger:hover { opacity: 0.8; }
+.btn-success {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: var(--radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.btn-success:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-donate {
+    background: var(--accent);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+}
+.btn-donate:hover { opacity: 0.9; }
+.btn-donate span {
+    background: rgba(0,0,0,0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+}
+.btn-reload {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-glass);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    transition: var(--transition);
+}
+.btn-reload:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+.item-list { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
+.item-row {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-glass);
+    padding: 18px 24px;
+    border-radius: var(--radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.app-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 30px 20px;
+    margin-top: 10px;
+}
+.app-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.app-item:hover { transform: translateY(-4px); filter: brightness(1.2); }
+.app-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+}
+.app-title { font-size: 0.85rem; color: #e4e4e7; font-weight: 500; max-width: 105px; line-height: 1.2; }
+.save-bar { margin-top: auto; border-top: 1px solid var(--border-glass); padding-top: 25px; display: flex; justify-content: flex-end; }
+.settings-checkbox { display: flex; align-items: center; gap: 10px; margin-top: 15px; }
+.settings-checkbox input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); }
+/* ===== TTS ===== */
+.tts-container { max-width: 800px; margin: 0 auto; padding: 20px 0 80px; }
+.tts-tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border-glass); padding-bottom: 8px; }
+.tts-tab-btn { background: transparent; border: none; color: var(--text-secondary); padding: 8px 20px; font-weight: 600; font-size: 1rem; cursor: pointer; border-radius: var(--radius); transition: var(--transition); }
+.tts-tab-btn:hover { background: rgba(255,255,255,0.03); color: var(--text-primary); }
+.tts-tab-btn.active { background: rgba(145,70,255,0.15); color: var(--accent); }
+.tts-panel { display: none; flex-direction: column; gap: 20px; }
+.tts-panel.active { display: flex; }
+.tts-setting { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius); padding: 16px 20px; }
+.tts-setting label { min-width: 160px; color: var(--text-secondary); font-weight: 500; }
+.tts-setting input[type="range"] { flex: 1; min-width: 100px; accent-color: var(--accent); }
+.tts-setting input[type="text"], .tts-setting input[type="number"] { flex: 1; min-width: 100px; background: #18181b; border: 1px solid var(--border-glass); padding: 8px 12px; border-radius: var(--radius); color: var(--text-primary); }
+.tts-setting select { flex: 1; min-width: 100px; background: #18181b; border: 1px solid var(--border-glass); padding: 8px 12px; border-radius: var(--radius); color: var(--text-primary); }
+.tts-setting .value { font-weight: 600; min-width: 40px; text-align: center; }
+.tts-checkbox { display: flex; align-items: center; gap: 8px; background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius); padding: 12px 20px; }
+.tts-checkbox input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
+.tts-checkbox label { color: var(--text-secondary); cursor: pointer; }
+.tts-list { background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius); padding: 16px 20px; }
+.tts-list-title { font-weight: 600; margin-bottom: 10px; color: var(--text-secondary); }
+.tts-list-items { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.tts-list-item { background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; }
+.tts-list-item .remove { cursor: pointer; color: var(--danger); font-weight: 700; }
+.tts-list-add { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.tts-list-add input { flex: 1; min-width: 120px; background: #18181b; border: 1px solid var(--border-glass); padding: 6px 12px; border-radius: var(--radius); color: var(--text-primary); }
+.tts-list-add button { background: var(--accent); color: white; border: none; padding: 6px 16px; border-radius: var(--radius); font-weight: 600; cursor: pointer; }
+@keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@media (max-width: 1024px) { .login-hero { padding: 0 40px; } .login-hero h1 { font-size: 2.8rem; } .login-card { max-width: 100%; } }
+@media (max-width: 768px) {
+    #login-page .container { flex-direction: column; }
+    .login-hero { padding: 40px; border-right: none; border-bottom: 1px solid var(--border-glass); align-items: center; text-align: center; }
+    .login-hero h1 { font-size: 2.2rem; }
+    .login-form { padding: 20px; }
+    .login-card { max-width: 100%; padding: 30px 20px; }
+    .sidebar { width: 80px; padding: 20px 10px; }
+    .sidebar .user-info, .sidebar .sidebar-category, .sidebar .tab-btn span:last-child { display: none; }
+    .sidebar .tab-btn { justify-content: center; padding: 12px; font-size: 1.2rem; }
+    .content { padding: 20px; }
+    .form-group { flex-direction: column; }
+    .item-row { flex-direction: column; gap: 10px; text-align: center; }
+    .tts-setting { flex-direction: column; align-items: stretch; }
+    .tts-setting label { min-width: unset; }
+}
+@media (max-width: 480px) {
+    .login-hero h1 { font-size: 1.8rem; }
+    .login-hero p { font-size: 1rem; }
+    .content { padding: 15px; }
+    .app-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 20px; }
+    .app-icon { width: 44px; height: 44px; font-size: 18px; }
+    .app-title { font-size: 0.75rem; }
+}
 </style>
 </head>
 <body>
@@ -36,70 +422,757 @@
 
 <!-- ===== DASHBOARD ===== -->
 <div id="main-dashboard">
-    <!-- Сайдбар и контент (такие же, как в предыдущей версии) -->
-    <!-- Я их опускаю для краткости, но они есть в полном файле -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">Domik<span>Bot</span></div>
+        <button class="sidebar-toggle" onclick="toggleSidebar()" title="Свернуть/развернуть">◀</button>
+        <div class="user-profile">
+            <img src="" id="user-avatar" class="user-avatar" alt="" />
+            <div class="user-info">
+                <span id="user-name" class="user-name">Загрузка...</span>
+                <span class="user-status">Учётная запись</span>
+            </div>
+        </div>
+        <div class="sidebar-category">Настройки бота</div>
+        <button class="tab-btn active" onclick="switchTab('tab-commands', this)">
+            <span>💬</span><span>Чат-Команды</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-timers', this)">
+            <span>📢</span><span>Объявления</span>
+        </button>
+        <div class="sidebar-category">Управление</div>
+        <button class="tab-btn" onclick="switchTab('tab-main-settings', this)">
+            <span>⚙️</span><span>Главные настройки</span>
+        </button>
+        <div class="sidebar-category">Инструменты</div>
+        <button class="tab-btn" onclick="switchTab('tab-hub', this)">
+            <span>🧩</span><span>Хаб приложений</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-tts', this)">
+            <span>🔊</span><span>TTS Настройки</span>
+        </button>
+        <button class="tab-btn logout" onclick="logout()">
+            <span>🚪</span><span>Выйти</span>
+        </button>
+    </aside>
+
+    <main class="content">
+        <!-- TAB: Commands -->
+        <section id="tab-commands" class="tab-content active">
+            <h1>Управление командами чата</h1>
+            <div class="form-group">
+                <input type="text" id="cmd-name" placeholder="Название (например: !vk)" maxlength="30" />
+                <input type="text" id="cmd-response" placeholder="Ответ бота..." />
+                <button class="btn-primary" onclick="addCommand()">Добавить</button>
+            </div>
+            <div class="item-list" id="commands-list"></div>
+        </section>
+
+        <!-- TAB: Timers -->
+        <section id="tab-timers" class="tab-content">
+            <h1>Автоматические объявления</h1>
+            <div class="form-group" style="align-items: center; background: var(--bg-glass); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border-glass);">
+                <label style="color: var(--text-secondary); font-weight: 600;">Интервал (минут):</label>
+                <input type="number" id="timer-interval" style="max-width: 90px; text-align: center;" min="1" value="10" />
+            </div>
+            <div class="form-group">
+                <input type="text" id="timer-text" placeholder="Текст уведомления..." />
+                <button class="btn-primary" onclick="addTimer()">Добавить</button>
+            </div>
+            <div class="item-list" id="timers-list"></div>
+        </section>
+
+        <!-- TAB: Main Settings -->
+        <section id="tab-main-settings" class="tab-content">
+            <h1>Главные настройки бота</h1>
+            <div style="max-width: 500px; margin: 0 auto; background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius); padding: 30px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <span style="font-weight: 600; font-size: 1.1rem;">Текущий канал</span>
+                    <span id="settings-channel-name" style="color: var(--accent); font-weight: 700;">@domik_xdx</span>
+                </div>
+                <hr style="border: none; border-top: 1px solid var(--border-glass); margin: 20px 0;" />
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-weight: 600; font-size: 1.1rem;">Статус бота</div>
+                    <div id="bot-status-text" style="font-size: 0.9rem; color: var(--text-secondary);">Подключение...</div>
+                </div>
+                <div style="margin-top: 10px; font-size: 0.85rem; color: var(--text-secondary);">
+                    Бот автоматически подключается при входе на сайт.
+                </div>
+                <div class="settings-checkbox" style="margin-top: 20px;">
+                    <input type="checkbox" id="open-in-new-window" />
+                    <label for="open-in-new-window" style="color: var(--text-secondary);">Открывать приложения в отдельных окнах</label>
+                </div>
+                <div style="margin-top: 20px; font-size: 0.85rem; color: var(--text-secondary);">
+                    💜 Ссылка на донат: <a href="https://www.donationalerts.com/r/xxx_domik_xxx" target="_blank" style="color: var(--accent);">https://www.donationalerts.com/r/xxx_domik_xxx</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: Hub -->
+        <section id="tab-hub" class="tab-content">
+            <h1>Хаб приложений</h1>
+            <div class="app-grid">
+                <a href="giveaway.html" class="app-item" target="_blank">
+                    <div class="app-icon" style="background:#f5a623">🎁</div>
+                    <div class="app-title">Giveaway</div>
+                </a>
+                <a href="songbattle.html" class="app-item" target="_blank">
+                    <div class="app-icon" style="background:#5b3cc4">🎵</div>
+                    <div class="app-title">Song Battle</div>
+                </a>
+                <a href="wheel.html" class="app-item" target="_blank">
+                    <div class="app-icon" style="background:#9a8b2c">🌐</div>
+                    <div class="app-title">Поле Чудес</div>
+                </a>
+                <a href="guess.html" class="app-item" target="_blank">
+                    <div class="app-icon" style="background:#1d8553">💡</div>
+                    <div class="app-title">Guess Word</div>
+                </a>
+            </div>
+        </section>
+
+        <!-- TAB: TTS -->
+        <section id="tab-tts" class="tab-content">
+            <div class="tts-container">
+                <h1 style="margin-bottom: 12px;">🔊 Настройки TTS</h1>
+                <div class="tts-tabs">
+                    <button class="tts-tab-btn active" data-panel="tts-general">Настройки</button>
+                    <button class="tts-tab-btn" data-panel="tts-filters">Фильтры</button>
+                    <button class="tts-tab-btn" data-panel="tts-lists">Списки пользователей</button>
+                </div>
+                <div id="tts-general" class="tts-panel active">
+                    <div class="tts-setting">
+                        <label>Включить TTS</label>
+                        <input type="checkbox" id="tts-enabled" checked>
+                    </div>
+                    <div class="tts-setting">
+                        <label>Голос по умолчанию</label>
+                        <select id="tts-voice"></select>
+                    </div>
+                    <div class="tts-setting">
+                        <label>Громкость озвучки</label>
+                        <input type="range" id="tts-volume" min="0" max="100" value="100">
+                        <span class="value" id="tts-volume-value">100%</span>
+                    </div>
+                    <div class="tts-setting">
+                        <label>Макс. длина сообщения (символов)</label>
+                        <input type="number" id="tts-max-length" value="252" min="1" max="1000">
+                    </div>
+                    <div class="tts-setting">
+                        <label>Префикс для озвучки</label>
+                        <input type="text" id="tts-prefix" value="!!!">
+                        <span style="color:var(--text-secondary);font-size:0.8rem;">Сообщения, начинающиеся с этого префикса, будут озвучены</span>
+                    </div>
+                    <div class="tts-setting">
+                        <label>Озвучивать ник отправителя</label>
+                        <input type="checkbox" id="tts-speak-nick" checked>
+                    </div>
+                    <div class="tts-setting">
+                        <label>Режим озвучки</label>
+                        <select id="tts-mode">
+                            <option value="all">Все сообщения</option>
+                            <option value="prefix" selected>Только с префиксом</option>
+                        </select>
+                    </div>
+                    <div class="tts-setting">
+                        <label>Всегда озвучивать на русском</label>
+                        <input type="checkbox" id="tts-force-russian" checked>
+                    </div>
+                    <div class="tts-setting">
+                        <label>Автоматически переводить</label>
+                        <input type="checkbox" id="tts-translate" disabled>
+                        <span style="color:var(--text-secondary);font-size:0.8rem;">(требуется API ключ, пока недоступно)</span>
+                    </div>
+                </div>
+                <div id="tts-filters" class="tts-panel">
+                    <div class="tts-checkbox">
+                        <input type="checkbox" id="tts-filter-mute" checked>
+                        <label>Не озвучивать мат</label>
+                    </div>
+                    <div class="tts-checkbox">
+                        <input type="checkbox" id="tts-filter-banwords" checked>
+                        <label>Не озвучивать банворды</label>
+                    </div>
+                    <div class="tts-checkbox">
+                        <input type="checkbox" id="tts-filter-nicks" checked>
+                        <label>Не озвучивать ники (@username)</label>
+                    </div>
+                    <div class="tts-checkbox">
+                        <input type="checkbox" id="tts-filter-replies" checked>
+                        <label>Не озвучивать ответы</label>
+                    </div>
+                    <div class="tts-checkbox">
+                        <input type="checkbox" id="tts-speak-emojis">
+                        <label>Озвучивать эмодзи (например, ❤️ → "сердце")</label>
+                    </div>
+                    <div class="tts-list">
+                        <div class="tts-list-title">Запрещённые слова (0 / 500)</div>
+                        <div class="tts-list-items" id="tts-banned-words"></div>
+                        <div class="tts-list-add">
+                            <input type="text" id="tts-banword-input" placeholder="Введите слово или фразу...">
+                            <button onclick="addBannedWord()">Добавить</button>
+                            <label style="display:flex;align-items:center;gap:6px;color:var(--text-secondary);font-size:0.8rem;">
+                                <input type="checkbox" id="tts-banword-case"> С учётом регистра
+                            </label>
+                            <label style="display:flex;align-items:center;gap:6px;color:var(--text-secondary);font-size:0.8rem;">
+                                <input type="checkbox" id="tts-banword-nested"> Вложенное сканирование
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div id="tts-lists" class="tts-panel">
+                    <div class="tts-list">
+                        <div class="tts-list-title">Доверенные пользователи</div>
+                        <div class="tts-list-items" id="tts-trusted"></div>
+                        <div class="tts-list-add">
+                            <input type="text" id="tts-trusted-input" placeholder="Ник пользователя">
+                            <button onclick="addTrustedUser()">Добавить</button>
+                        </div>
+                    </div>
+                    <div class="tts-list">
+                        <div class="tts-list-title">Принудительная озвучка</div>
+                        <div class="tts-list-items" id="tts-forced"></div>
+                        <div class="tts-list-add">
+                            <input type="text" id="tts-forced-input" placeholder="Ник пользователя">
+                            <button onclick="addForcedUser()">Добавить</button>
+                        </div>
+                    </div>
+                    <div class="tts-list">
+                        <div class="tts-list-title">Игнорируемые пользователи</div>
+                        <div class="tts-list-items" id="tts-ignored"></div>
+                        <div class="tts-list-add">
+                            <input type="text" id="tts-ignored-input" placeholder="Ник пользователя">
+                            <button onclick="addIgnoredUser()">Добавить</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top:20px; display:flex; gap:12px; flex-wrap:wrap;">
+                    <button class="btn-primary" onclick="saveTTSSettings()">💾 Сохранить настройки TTS</button>
+                    <button class="btn-success" onclick="testTTS()">🔊 Тест озвучки</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Save Bar -->
+        <div class="save-bar" id="global-save-bar">
+            <button class="btn-success" onclick="saveConfig()">💾 Сохранить настройки бота</button>
+        </div>
+    </main>
 </div>
 
 <script>
 // ================================================================
-// ИСПРАВЛЕННЫЙ КЛИЕНТСКИЙ КОД
+//  ПОЛНЫЙ КЛИЕНТСКИЙ КОД (оптимизированный)
 // ================================================================
 const TWITCH_CLIENT_ID = 'n71zv0v6u6l5uxc50toagqd87a1n7z';
-const BACKEND_URL = 'https://domikbot-12-production.up.railway.app'; // ← ПРОВЕРЬТЕ ЭТОТ URL!
+const BACKEND_URL = 'https://domikbot-12-production.up.railway.app';
 const DONATE_URL = 'https://www.donationalerts.com/r/xxx_domik_xxx';
 
 let currentUser = 'domik_xdx';
 let localConfig = { commands: {}, announcements: [], interval: 10 };
 let socket = null;
-
-window.onload = function() {
-    checkAuth();
-    setupSocket();
+let ttsSettings = {
+    enabled: true, voice: '', volume: 100, maxLength: 252, prefix: '!!!',
+    speakNick: true, mode: 'prefix', forceRussian: true,
+    filterMute: true, filterBanwords: true, filterNicks: true, filterReplies: true, speakEmojis: false,
+    bannedWords: [], trustedUsers: [], forcedUsers: [], ignoredUsers: []
 };
 
+window.onload = function() {
+    const params = new URLSearchParams(window.location.search);
+    const app = params.get('app');
+    if (app) { document.body.classList.add('standalone-mode'); switchTabByApp(app); history.replaceState({}, document.title, window.location.pathname); }
+    document.getElementById('open-in-new-window').checked = localStorage.getItem('open_in_new_window') === 'true';
+    document.getElementById('open-in-new-window').addEventListener('change', function() {
+        localStorage.setItem('open_in_new_window', this.checked);
+    });
+    checkAuth();
+    setupSocket();
+    loadTTSSettings();
+    populateVoiceList();
+    setupTTSTabs();
+};
+
+// ===== AUTH =====
 function checkAuth() {
-    // ... (такая же, как в предыдущей версии)
+    const hash = window.location.hash;
+    if (hash) {
+        const params = new URLSearchParams(hash.substring(1));
+        const token = params.get('access_token');
+        if (token) {
+            localStorage.setItem('domik_bot_token', token);
+            localStorage.setItem('domik_bot_logged_in', 'true');
+            history.replaceState(null, null, window.location.pathname);
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('main-dashboard').style.display = 'flex';
+            fetchTwitchUserData(token);
+            return;
+        }
+    }
+    if (localStorage.getItem('domik_bot_logged_in') === 'true' && localStorage.getItem('domik_bot_token')) {
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('main-dashboard').style.display = 'flex';
+        fetchTwitchUserData(localStorage.getItem('domik_bot_token'));
+    } else {
+        document.getElementById('login-page').style.display = 'flex';
+        document.getElementById('main-dashboard').style.display = 'none';
+    }
 }
 
+function loginWithTwitch() {
+    const scopes = 'user:read:email chat:read chat:edit';
+    const redirect = window.location.origin + window.location.pathname;
+    window.location.href =
+        `https://id.twitch.tv/oauth2/authorize?client_id=${TWITCH_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirect)}&response_type=token&scope=${encodeURIComponent(scopes)}&force_verify=true`;
+}
+
+function logout() {
+    localStorage.removeItem('domik_bot_logged_in');
+    localStorage.removeItem('domik_bot_token');
+    window.location.href = window.location.pathname;
+}
+
+async function fetchTwitchUserData(token) {
+    try {
+        const res = await fetch('https://api.twitch.tv/helix/users', {
+            headers: { 'Authorization': `Bearer ${token}`, 'Client-Id': TWITCH_CLIENT_ID }
+        });
+        const data = await res.json();
+        if (data.data && data.data.length > 0) {
+            const user = data.data[0];
+            currentUser = user.login;
+            document.getElementById('user-name').textContent = user.display_name;
+            document.getElementById('user-avatar').src = user.profile_image_url;
+            document.getElementById('settings-channel-name').textContent = '@' + currentUser;
+            if (socket) {
+                socket.emit('auth', { channel: currentUser, token });
+                socket.emit('set_bot_status', { channel: currentUser, active: true });
+            }
+            loadConfig();
+        }
+    } catch (e) { setupDemoUser(); }
+}
+
+function setupDemoUser() {
+    currentUser = 'domik_xdx';
+    document.getElementById('user-name').textContent = 'Domik_XDX';
+    document.getElementById('user-avatar').src = 'https://id.twitch.tv/static/images/badges/moderator.png';
+    document.getElementById('settings-channel-name').textContent = '@' + currentUser;
+    loadConfig();
+}
+
+// ===== WEBSOCKET =====
 function setupSocket() {
     try {
-        console.log('🔄 Подключение к серверу:', BACKEND_URL);
         socket = io(BACKEND_URL, {
             transports: ['websocket', 'polling'],
+            withCredentials: true,
             reconnectionAttempts: 5,
             reconnectionDelay: 1000
         });
-
         socket.on('connect', () => {
-            console.log('✅ WebSocket подключен');
-            // При подключении отправляем auth, если есть токен
+            console.log('✅ WebSocket connected');
             const token = localStorage.getItem('domik_bot_token');
             if (token && currentUser) {
                 socket.emit('auth', { channel: currentUser, token });
                 socket.emit('set_bot_status', { channel: currentUser, active: true });
             }
         });
-
-        socket.on('connect_error', (err) => {
-            console.error('❌ Ошибка подключения к серверу:', err.message);
-            // Показать ошибку пользователю
-            alert('Не удалось подключиться к серверу. Проверьте, запущен ли сервер.');
+        socket.on('disconnect', () => console.warn('⚠️ WebSocket disconnected'));
+        socket.on('connect_error', (err) => console.error('❌ Ошибка подключения к серверу:', err.message));
+        socket.on('chatMessage', (data) => {
+            if (data.channel !== currentUser) return;
+            if (ttsSettings.enabled) processTTS(data);
         });
-
-        socket.on('disconnect', () => {
-            console.warn('⚠️ WebSocket отключился');
+        socket.on('bot_status_changed', (data) => {
+            if (data.channel === currentUser) updateBotStatusUI(data.active);
         });
+        // Остальные события (battle, giveaway, wheel, guess) не нужны, т.к. они в отдельных окнах
+        // Но оставляем их заглушками для совместимости
+        const token = localStorage.getItem('domik_bot_token');
+        if (token && currentUser) {
+            socket.emit('auth', { channel: currentUser, token });
+            socket.emit('set_bot_status', { channel: currentUser, active: true });
+        }
+    } catch (e) { console.error('Socket error:', e); }
+}
 
-        // Остальные обработчики (chatMessage, bot_status_changed, etc.)
-        // ... (они такие же, как в предыдущей версии)
-
-    } catch (e) {
-        console.error('❌ Ошибка создания сокета:', e);
+// ===== TTS =====
+function populateVoiceList() {
+    const select = document.getElementById('tts-voice');
+    select.innerHTML = '';
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices.length) { window.speechSynthesis.onvoiceschanged = populateVoiceList; return; }
+    voices.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.name;
+        opt.textContent = `${v.name} (${v.lang})`;
+        select.appendChild(opt);
+    });
+    if (ttsSettings.voice) select.value = ttsSettings.voice;
+    else {
+        const ru = Array.from(select.options).find(o => o.text.includes('ru'));
+        if (ru) select.value = ru.value;
     }
 }
 
-// Остальные функции (loginWithTwitch, logout, fetchTwitchUserData, etc.)
-// ... (они такие же, как в предыдущей версии)
+function loadTTSSettings() {
+    const saved = localStorage.getItem('domik_tts_settings');
+    if (saved) { try { ttsSettings = { ...ttsSettings, ...JSON.parse(saved) }; } catch(e) {} }
+    document.getElementById('tts-enabled').checked = ttsSettings.enabled;
+    document.getElementById('tts-volume').value = ttsSettings.volume;
+    document.getElementById('tts-volume-value').textContent = ttsSettings.volume + '%';
+    document.getElementById('tts-max-length').value = ttsSettings.maxLength;
+    document.getElementById('tts-prefix').value = ttsSettings.prefix;
+    document.getElementById('tts-speak-nick').checked = ttsSettings.speakNick;
+    document.getElementById('tts-mode').value = ttsSettings.mode;
+    document.getElementById('tts-force-russian').checked = ttsSettings.forceRussian;
+    document.getElementById('tts-filter-mute').checked = ttsSettings.filterMute;
+    document.getElementById('tts-filter-banwords').checked = ttsSettings.filterBanwords;
+    document.getElementById('tts-filter-nicks').checked = ttsSettings.filterNicks;
+    document.getElementById('tts-filter-replies').checked = ttsSettings.filterReplies;
+    document.getElementById('tts-speak-emojis').checked = ttsSettings.speakEmojis;
+    renderList('tts-banned-words', ttsSettings.bannedWords, 'banned');
+    renderList('tts-trusted', ttsSettings.trustedUsers, 'trusted');
+    renderList('tts-forced', ttsSettings.forcedUsers, 'forced');
+    renderList('tts-ignored', ttsSettings.ignoredUsers, 'ignored');
+}
+
+function saveTTSSettings() {
+    ttsSettings.enabled = document.getElementById('tts-enabled').checked;
+    ttsSettings.volume = parseInt(document.getElementById('tts-volume').value);
+    ttsSettings.maxLength = parseInt(document.getElementById('tts-max-length').value) || 252;
+    ttsSettings.prefix = document.getElementById('tts-prefix').value.trim();
+    ttsSettings.speakNick = document.getElementById('tts-speak-nick').checked;
+    ttsSettings.mode = document.getElementById('tts-mode').value;
+    ttsSettings.forceRussian = document.getElementById('tts-force-russian').checked;
+    ttsSettings.filterMute = document.getElementById('tts-filter-mute').checked;
+    ttsSettings.filterBanwords = document.getElementById('tts-filter-banwords').checked;
+    ttsSettings.filterNicks = document.getElementById('tts-filter-nicks').checked;
+    ttsSettings.filterReplies = document.getElementById('tts-filter-replies').checked;
+    ttsSettings.speakEmojis = document.getElementById('tts-speak-emojis').checked;
+    ttsSettings.voice = document.getElementById('tts-voice').value;
+    localStorage.setItem('domik_tts_settings', JSON.stringify(ttsSettings));
+    alert('✅ Настройки TTS сохранены!');
+}
+
+function renderList(containerId, items, type) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    items.forEach((item, index) => {
+        const span = document.createElement('span');
+        span.className = 'tts-list-item';
+        span.innerHTML = `${escapeHTML(item)} <span class="remove" data-type="${type}" data-index="${index}">✕</span>`;
+        container.appendChild(span);
+    });
+    container.querySelectorAll('.remove').forEach(el => {
+        el.addEventListener('click', function() {
+            const type = this.dataset.type;
+            const idx = parseInt(this.dataset.index);
+            removeListItem(type, idx);
+        });
+    });
+}
+
+function removeListItem(type, index) {
+    if (type === 'banned') ttsSettings.bannedWords.splice(index, 1);
+    else if (type === 'trusted') ttsSettings.trustedUsers.splice(index, 1);
+    else if (type === 'forced') ttsSettings.forcedUsers.splice(index, 1);
+    else if (type === 'ignored') ttsSettings.ignoredUsers.splice(index, 1);
+    saveTTSSettings();
+    renderList(`tts-${type}`, ttsSettings[type + 'Users'] || ttsSettings[type + 'Words'], type);
+}
+
+function addBannedWord() {
+    const input = document.getElementById('tts-banword-input');
+    const word = input.value.trim();
+    if (!word) return;
+    if (ttsSettings.bannedWords.includes(word)) { alert('Это слово уже в списке'); return; }
+    ttsSettings.bannedWords.push(word);
+    input.value = '';
+    saveTTSSettings();
+    renderList('tts-banned-words', ttsSettings.bannedWords, 'banned');
+}
+
+function addTrustedUser() {
+    const input = document.getElementById('tts-trusted-input');
+    const user = input.value.trim().toLowerCase();
+    if (!user) return;
+    if (ttsSettings.trustedUsers.includes(user)) { alert('Пользователь уже в списке'); return; }
+    ttsSettings.trustedUsers.push(user);
+    input.value = '';
+    saveTTSSettings();
+    renderList('tts-trusted', ttsSettings.trustedUsers, 'trusted');
+}
+
+function addForcedUser() {
+    const input = document.getElementById('tts-forced-input');
+    const user = input.value.trim().toLowerCase();
+    if (!user) return;
+    if (ttsSettings.forcedUsers.includes(user)) { alert('Пользователь уже в списке'); return; }
+    ttsSettings.forcedUsers.push(user);
+    input.value = '';
+    saveTTSSettings();
+    renderList('tts-forced', ttsSettings.forcedUsers, 'forced');
+}
+
+function addIgnoredUser() {
+    const input = document.getElementById('tts-ignored-input');
+    const user = input.value.trim().toLowerCase();
+    if (!user) return;
+    if (ttsSettings.ignoredUsers.includes(user)) { alert('Пользователь уже в списке'); return; }
+    ttsSettings.ignoredUsers.push(user);
+    input.value = '';
+    saveTTSSettings();
+    renderList('tts-ignored', ttsSettings.ignoredUsers, 'ignored');
+}
+
+function testTTS() {
+    speakText('Тест TTS: тестовое сообщение');
+}
+
+function speakText(text) {
+    if (!window.speechSynthesis) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voiceName = ttsSettings.voice;
+    if (voiceName) {
+        const voices = window.speechSynthesis.getVoices();
+        const found = voices.find(v => v.name === voiceName);
+        if (found) utterance.voice = found;
+    }
+    utterance.volume = ttsSettings.volume / 100;
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    if (ttsSettings.forceRussian) utterance.lang = 'ru-RU';
+    window.speechSynthesis.speak(utterance);
+}
+
+function processTTS(data) {
+    const user = data.user;
+    const msg = data.message;
+    if (ttsSettings.ignoredUsers.includes(user.toLowerCase())) return;
+    if (msg.length > ttsSettings.maxLength) return;
+    const isForced = ttsSettings.forcedUsers.includes(user.toLowerCase());
+    const hasPrefix = msg.trim().startsWith(ttsSettings.prefix);
+    const isTrusted = ttsSettings.trustedUsers.includes(user.toLowerCase());
+    if (ttsSettings.mode === 'prefix' && !hasPrefix && !isForced && !isTrusted) return;
+    let text = msg;
+    if (hasPrefix) text = text.slice(ttsSettings.prefix.length).trim();
+    if (ttsSettings.filterMute) {
+        const badWords = ['хуй', 'пизда', 'бля', 'сука', 'залупа', 'мудак', 'уебок', 'пидорас'];
+        const regex = new RegExp(badWords.join('|'), 'gi');
+        text = text.replace(regex, '***');
+    }
+    if (ttsSettings.filterBanwords) {
+        ttsSettings.bannedWords.forEach(w => {
+            text = text.replace(new RegExp(w, 'gi'), '****');
+        });
+    }
+    if (ttsSettings.filterNicks) text = text.replace(/@\w+/g, '');
+    if (ttsSettings.filterReplies) {
+        if (text.trim().startsWith('@')) text = text.replace(/^@\w+\s*/, '');
+    }
+    if (!text.trim()) return;
+    let finalText = text;
+    if (ttsSettings.speakNick) finalText = `Сообщение от ${user}: ${finalText}`;
+    speakText(finalText);
+}
+
+// ===== CONFIG =====
+async function loadConfig() {
+    try {
+        const res = await fetch(`${BACKEND_URL}/api/config?user=${currentUser}`);
+        localConfig = await res.json();
+    } catch (e) {
+        const saved = localStorage.getItem(`domik_bot_config_${currentUser}`);
+        if (saved) localConfig = JSON.parse(saved);
+    }
+    if (!localConfig.commands) localConfig.commands = {};
+    if (!localConfig.announcements) localConfig.announcements = [];
+    document.getElementById('timer-interval').value = localConfig.interval || 10;
+    renderCommands();
+    renderTimers();
+}
+
+async function saveConfig() {
+    localConfig.interval = parseInt(document.getElementById('timer-interval').value) || 10;
+    try {
+        const res = await fetch(`${BACKEND_URL}/api/config?user=${currentUser}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(localConfig)
+        });
+        if (res.ok) alert('✅ Настройки сохранены на сервере!');
+    } catch (e) {
+        localStorage.setItem(`domik_bot_config_${currentUser}`, JSON.stringify(localConfig));
+        alert('💾 Настройки сохранены локально!');
+    }
+}
+
+function renderCommands() {
+    const container = document.getElementById('commands-list');
+    container.innerHTML = '';
+    for (const [cmd, resp] of Object.entries(localConfig.commands || {})) {
+        container.innerHTML += `
+            <div class="item-row">
+                <div><strong style="color:var(--accent)">${escapeHTML(cmd)}</strong> — ${escapeHTML(resp)}</div>
+                <button class="btn-danger" onclick="deleteCommand('${cmd}')">Удалить</button>
+            </div>
+        `;
+    }
+}
+
+function addCommand() {
+    const name = document.getElementById('cmd-name').value.trim();
+    const resp = document.getElementById('cmd-response').value.trim();
+    if (!name || !resp) { alert('Заполните оба поля!'); return; }
+    if (!localConfig.commands) localConfig.commands = {};
+    localConfig.commands[name] = resp;
+    document.getElementById('cmd-name').value = '';
+    document.getElementById('cmd-response').value = '';
+    renderCommands();
+}
+
+function deleteCommand(cmd) {
+    if (confirm(`Удалить команду "${cmd}"?`)) {
+        delete localConfig.commands[cmd];
+        renderCommands();
+    }
+}
+
+function renderTimers() {
+    const container = document.getElementById('timers-list');
+    container.innerHTML = '';
+    (localConfig.announcements || []).forEach((text, index) => {
+        container.innerHTML += `
+            <div class="item-row">
+                <div>${escapeHTML(text)}</div>
+                <button class="btn-danger" onclick="deleteTimer(${index})">Удалить</button>
+            </div>
+        `;
+    });
+}
+
+function addTimer() {
+    const text = document.getElementById('timer-text').value.trim();
+    if (!text) { alert('Введите текст!'); return; }
+    if (!localConfig.announcements) localConfig.announcements = [];
+    localConfig.announcements.push(text);
+    document.getElementById('timer-text').value = '';
+    renderTimers();
+}
+
+function deleteTimer(index) {
+    if (confirm('Удалить уведомление?')) {
+        localConfig.announcements.splice(index, 1);
+        renderTimers();
+    }
+}
+
+// ===== NAVIGATION =====
+function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    if (btn) btn.classList.add('active');
+    const saveBar = document.getElementById('global-save-bar');
+    if (['tab-hub', 'tab-main-settings', 'tab-tts'].includes(tabId)) {
+        saveBar.style.display = 'none';
+    } else {
+        saveBar.style.display = 'flex';
+    }
+}
+
+function switchTabByApp(appName) {
+    const map = { 'giveaway': 'tab-giveaway', 'songbattle': 'tab-song-battle', 'wheel': 'tab-wheel', 'guess': 'tab-guess' };
+    const tabId = map[appName];
+    if (tabId) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            if (b.textContent.toLowerCase().includes(appName)) b.classList.add('active');
+        });
+        document.getElementById('global-save-bar').style.display = 'none';
+    }
+}
+
+function handleAppClick(appName) {
+    const openInNew = document.getElementById('open-in-new-window').checked;
+    if (openInNew) {
+        window.open(window.location.origin + window.location.pathname + '?app=' + appName, '_blank');
+    } else {
+        switchTabByApp(appName);
+    }
+}
+
+function openGiveawayApp() { switchTab('tab-giveaway'); }
+function openSongBattle() { switchTab('tab-song-battle'); }
+function openWheelApp() { switchTab('tab-wheel'); }
+function openGuessApp() { switchTab('tab-guess'); }
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+function openDonate() { window.open(DONATE_URL, '_blank'); }
+
+function updateBotStatusUI(active) {
+    const statusText = document.getElementById('bot-status-text');
+    if (active) {
+        statusText.textContent = 'Включён (бот в чате)';
+        statusText.style.color = 'var(--success)';
+    } else {
+        statusText.textContent = 'Выключен';
+        statusText.style.color = 'var(--text-secondary)';
+    }
+}
+
+function setupTTSTabs() {
+    document.querySelectorAll('.tts-tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tts-tab-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const panelId = this.dataset.panel;
+            document.querySelectorAll('.tts-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
+        });
+    });
+}
+
+document.getElementById('tts-volume')?.addEventListener('input', function() {
+    document.getElementById('tts-volume-value').textContent = this.value + '%';
+});
+
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// Глобальные функции для onclick
+window.loginWithTwitch = loginWithTwitch;
+window.logout = logout;
+window.switchTab = switchTab;
+window.openGiveawayApp = openGiveawayApp;
+window.openSongBattle = openSongBattle;
+window.openWheelApp = openWheelApp;
+window.openGuessApp = openGuessApp;
+window.addCommand = addCommand;
+window.deleteCommand = deleteCommand;
+window.addTimer = addTimer;
+window.deleteTimer = deleteTimer;
+window.saveConfig = saveConfig;
+window.toggleSidebar = toggleSidebar;
+window.openDonate = openDonate;
+window.handleAppClick = handleAppClick;
+window.switchTabByApp = switchTabByApp;
+window.testTTS = testTTS;
+window.saveTTSSettings = saveTTSSettings;
+window.addBannedWord = addBannedWord;
+window.addTrustedUser = addTrustedUser;
+window.addForcedUser = addForcedUser;
+window.addIgnoredUser = addIgnoredUser;
 </script>
 </body>
 </html>
