@@ -3,9 +3,6 @@ const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
 const tmi = require('tmi.js');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const path = require('path');
 
 const PORT = process.env.PORT || 3000;
 const BOT_USERNAME = process.env.BOT_USERNAME;
@@ -20,52 +17,21 @@ if (!BOT_USERNAME || !BOT_TOKEN || !CLIENT_ID) {
 console.log(`🤖 Бот ${BOT_USERNAME} запускается...`);
 
 const app = express();
-app.set('trust proxy', 1);
-app.use(helmet());
-
-// === РАЗРЕШАЕМ CORS ===
-app.use(cors({
-    origin: [
-        'https://domikxdx.github.io',
-        'https://domikbot-12-production.up.railway.app',
-        'http://localhost:3000'
-    ],
-    credentials: true
-}));
-
-app.use(express.json({ limit: '1mb' }));
-
-// === РАЗДАЁМ СТАТИКУ (HTML, CSS, JS) ===
-app.use(express.static(__dirname));
-
-// === ЯВНЫЙ РОУТ ДЛЯ КОРНЯ ===
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// === Rate Limiting для API ===
-const apiLimiter = rateLimit({
-    windowMs: 1 * 60 * 1000,
-    max: 30,
-    message: { error: 'Слишком много запросов. Подождите минуту.' },
-    standardHeaders: true,
-    legacyHeaders: false,
-});
-app.use('/api', apiLimiter);
+app.use(cors()); // разрешаем все запросы
+app.use(express.json());
 
 // === Health check ===
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', bot: BOT_USERNAME });
 });
 
+// === Раздача статики (если нужно) ===
+app.use(express.static(__dirname));
+
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: [
-            'https://domikxdx.github.io',
-            'https://domikbot-12-production.up.railway.app',
-            'http://localhost:3000'
-        ],
+        origin: '*',
         methods: ['GET', 'POST']
     },
     transports: ['websocket', 'polling']
@@ -74,17 +40,10 @@ const io = socketIo(server, {
 // === Хранилища ===
 const clients = {};
 const botStatus = {};
-const ipConnections = {};
-const userCooldowns = {};
 
-// === Подключение бота ===
 function connectBot(channel) {
-    console.log(`🔌 connectBot вызван для канала ${channel}`);
     const entry = clients[channel];
-    if (!entry) {
-        console.error(`❌ Нет клиента для ${channel}`);
-        return;
-    }
+    if (!entry) return;
     const { client } = entry;
 
     if (client.readyState === 'OPEN') {
@@ -94,7 +53,6 @@ function connectBot(channel) {
         return;
     }
 
-    console.log(`🔄 Пытаемся подключить бота к #${channel}...`);
     client.connect()
         .then(() => {
             console.log(`✅ Бот ${BOT_USERNAME} подключился к #${channel}`);
@@ -108,34 +66,17 @@ function connectBot(channel) {
         });
 }
 
-// === WebSocket ===
 io.on('connection', (socket) => {
-    const ip = socket.handshake.address;
-
-    ipConnections[ip] = (ipConnections[ip] || 0) + 1;
-    if (ipConnections[ip] > 3) {
-        socket.emit('error', 'Слишком много соединений с вашего IP');
-        socket.disconnect();
-        return;
-    }
-
-    socket.on('disconnect', () => {
-        ipConnections[ip] = (ipConnections[ip] || 1) - 1;
-        if (ipConnections[ip] <= 0) delete ipConnections[ip];
-        console.log('🔌 Клиент отключился от WebSocket');
-    });
-
     console.log('🔌 Новый клиент подключился к WebSocket');
 
     socket.on('auth', async ({ channel, token }) => {
-        console.log(`🔑 Получен auth для канала ${channel}, токен: ${token ? 'есть' : 'нет'}`);
+        console.log(`🔑 Получен auth для канала ${channel}`);
         if (!channel || !token) {
             socket.emit('auth_error', 'Не указан канал или токен');
             return;
         }
 
         if (clients[channel]) {
-            console.log(`ℹ️ Клиент для ${channel} уже существует`);
             socket.join(channel);
             socket.emit('auth_success', { channel, message: 'Уже авторизованы' });
             const entry = clients[channel];
@@ -149,7 +90,6 @@ io.on('connection', (socket) => {
         }
 
         try {
-            console.log(`🆕 Создаём нового клиента для канала ${channel}`);
             const client = new tmi.Client({
                 options: { debug: false },
                 identity: {
@@ -163,18 +103,12 @@ io.on('connection', (socket) => {
             socket.join(channel);
             socket.emit('auth_success', { channel, message: 'Авторизация успешна' });
 
+            // Автоматически подключаем бота
             connectBot(channel);
 
             client.on('message', (chan, tags, message, self) => {
                 if (self) return;
                 const user = tags['display-name'] || tags.username;
-                const now = Date.now();
-
-                if (userCooldowns[user] && userCooldowns[user] > now - 1000) {
-                    return;
-                }
-                userCooldowns[user] = now;
-
                 const msg = message.trim();
                 io.to(channel).emit('chatMessage', { channel, user, message: msg });
 
@@ -212,12 +146,14 @@ io.on('connection', (socket) => {
             io.to(channel).emit('bot_status_changed', { channel, active: false });
         }
     });
+
+    socket.on('disconnect', () => {
+        console.log('🔌 Клиент отключился от WebSocket');
+    });
 });
 
-// === Запуск сервера ===
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
     console.log(`🤖 Бот ${BOT_USERNAME} готов к подключению`);
     console.log(`🔗 Health check: http://localhost:${PORT}/health`);
-    console.log(`🌐 Сайт доступен по адресу: http://localhost:${PORT}/`);
 });
